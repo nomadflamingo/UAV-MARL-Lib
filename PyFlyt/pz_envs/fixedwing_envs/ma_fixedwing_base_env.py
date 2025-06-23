@@ -196,13 +196,14 @@ class MAFixedwingBaseEnv(ParallelEnv):
 
         # if render, use onboard camera for the first aircraft
         if self.render_mode:
-            drone_options[0]["use_camera"] = True
-            drone_options[0]["camera_fps"] = int(120 / self.env_step_ratio)
+            drone_options[1]["use_camera"] = True
+            drone_options[1]["camera_fps"] = int(120 / self.env_step_ratio)
 
         # rebuild the environment
         self.aviary = Aviary(
             start_pos=self.start_pos,
             start_orn=self.start_orn,
+            # drone_type="quadx",
             drone_type="fixedwing",
             render=bool(self.render_mode),
             drone_options=drone_options,

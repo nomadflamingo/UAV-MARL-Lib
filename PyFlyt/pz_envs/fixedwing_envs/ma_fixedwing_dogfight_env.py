@@ -8,7 +8,9 @@ import numpy as np
 from gymnasium import spaces
 
 from PyFlyt.pz_envs.fixedwing_envs.ma_fixedwing_base_env import MAFixedwingBaseEnv
-
+from matplotlib import pyplot as plt
+import os
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
     """Team Dogfighting Environment for the Acrowing model using the PettingZoo API.
@@ -41,7 +43,7 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
 
     def __init__(
         self,
-        team_size: int = 2,
+        team_size: int = 1,
         spawn_min_radius: float = 10.0,
         spawn_max_radius: float = 50.0,
         spawn_min_height: float = 20.0,
@@ -161,6 +163,7 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         # some rendering constants
         self.hit_colour = np.array([1.0, 0.0, 0.0, 0.2])
         self.nohit_color = np.array([0.0, 0.0, 0.0, 0.025])
+        self.trajs: dict[str, list[np.ndarray]] = {}
 
     def observation_space(self, agent: Any = None) -> spaces.Dict | spaces.Box:
         """observation_space.
@@ -190,7 +193,7 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         # start out pointing in outward directions equally spaced
         start_radian = np.pi / self.team_size * np.arange(
             self.team_size * 2
-        ) + np_random.uniform(0.0, 2 * np.pi)
+        ) + np.random.uniform(0.0, 2 * np.pi)
         start_radius = np_random.uniform(
             low=self.spawn_min_radius,
             high=self.spawn_max_radius,
@@ -330,6 +333,10 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
             ag: self.pop_obs_by_id(self.agent_name_mapping[ag]) for ag in self.agents
         }
         infos = {ag: dict() for ag in self.agents}
+        self.trajs = {ag: [] for ag in self.agents}
+        for ag, idx in self.agent_name_mapping.items():
+            pos = self.aviary.state(idx)[-1]
+            self.trajs[ag].append(pos.copy())
         return observations, infos
 
     def update_states(self) -> None:
@@ -829,5 +836,24 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
                     7,
                     rgbaColor=(np.array([0.0, 0.0, 0.0, 0.0])),
                 )
-
+        for ag, idx in self.agent_name_mapping.items():
+            pos = self.aviary.state(idx)[-1]
+            self.trajs[ag].append(pos.copy())
         return returns
+    
+    def render_trajectory(self, save_path: str = None):
+        """Plot 3D trajectories for all agents."""
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for ag, path in self.trajs.items():
+            pts = np.array(path)
+            ax.plot(pts[:,0], pts[:,1], pts[:,2], label=ag)
+        ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
+        ax.legend(); ax.set_title('Dogfight Trajectories')
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path)
+        else:
+            plt.show()
+        plt.close()
+

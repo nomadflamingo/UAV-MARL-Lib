@@ -30,6 +30,7 @@ class Fixedwing(DroneClass):
         camera_angle_degrees: int = 0,
         camera_FOV_degrees: int = 90,
         camera_resolution: tuple[int, int] = (128, 128),
+        # camera_resolution: tuple[int, int] = (720, 1280),
         camera_position_offset: np.ndarray = np.array([-3.0, 0.0, 1.0]),
         camera_fps: None | int = None,
         starting_velocity: np.ndarray = np.array([20.0, 0.0, 0.0]),
