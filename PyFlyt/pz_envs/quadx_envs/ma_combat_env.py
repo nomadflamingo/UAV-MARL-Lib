@@ -36,9 +36,9 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         goal_reach_angle: float = 0.1,
         flight_mode: int = 0,
         flight_dome_size: float = 5.0,
-        max_duration_seconds: float = 30.0,
+        max_duration_seconds: float = 10.0,
         angle_representation: Literal["euler", "quaternion"] = "quaternion",
-        agent_hz: int = 40,
+        agent_hz: int = 30,
         render_mode: None | str = None,
     ):
         self.max_lin_vel      = max_lin_vel
@@ -131,6 +131,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
     def compute_observation_by_id(self, agent_id: int) -> dict[str, np.ndarray]:
         """Compute observation for a single agent by ID and pad waypoint deltas."""
         raw = self.compute_attitude_by_id(agent_id)
+        # self.attitudes = np.stack(self.aviary.all_states, axis=0)
         aux = self.aviary.aux_state(agent_id)
         ang_vel, ang_pos, lin_vel, lin_pos, quat = raw
 
@@ -197,13 +198,13 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         info  = {}
 
         # 1) normalized agility
-        v_norm = (np.linalg.norm(lin_vel) / self.max_lin_vel) * 0.2
+        v_norm = (np.linalg.norm(lin_vel) / self.max_lin_vel)
 
         # 2) compute delta to next waypoint (vector from curr_pos → wp)
         if len(self.waypoints.targets)==0:
             curr_delta = np.zeros((self.target_dim,),dtype=np.float64)
         else:
-            curr_delta = np.asarray(self.waypoints.distance_to_targets(ang_pos, lin_pos, quat))[0]
+            curr_delta = np.asarray(self.waypoints.distance_to_targets(ang_pos, lin_pos, quat))#[0]
         curr_dist = float(np.linalg.norm(curr_delta[:3]))
         dist_norm = curr_dist / self.flight_dome_size
 
@@ -220,34 +221,50 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         # 4) shaping reward (ego only)
         shape_r = 0.0
         if agent_id == self.ego_index:
-            shape_r = self.shaping_coeff * (prev_dist - curr_dist) / self.flight_dome_size
-
+            # shape_r = self.shaping_coeff * (prev_dist - curr_dist) / self.flight_dome_size
+            shape_r =  - curr_dist
         # 5) time penalty
         tp = self.time_penalty
 
         # now build raw reward
-        reward = v_norm - dist_norm + shape_r - tp
+        # some thing dumb 
+        yaw = ang_pos[-1]
+        dist_origin = float(np.linalg.norm(lin_pos))
+
+        boundary_r  = np.tanh(0.1 * yaw       - 1.0)
+        boundary_r -= np.tanh(0.0025 * dist_origin - 1.0)
+
+        # reward = v_norm - dist_norm + shape_r - tp + boundary_r
+        reward = shape_r + boundary_r
+
 
         # bonus on event
         if agent_id == self.ego_index:
             # progress fraction
             prog = self.waypoints.progress_to_next_target
-            reward += 3.0 * prog
+            reward += max(3.0 * prog, 0.0)
+            reward += max(1.0 / self.waypoints.distance_to_next_target, 0.0)
             # waypoint reached?
             if curr_dist < self.waypoints.goal_reach_distance:
                 reward += self.waypoint_reward
                 info["waypoint_reached"] = True
                 self.waypoints.advance_targets()
+                # self.truncation |= self.waypoints.all_targets_reached
+                info['num_targets_reached'] = self.waypoints.num_targets_reached
+                info['env_complete'] = self.waypoints.all_targets_reached
+                # self.info["env_complete"] = self.waypoints.all_targets_reached
+                # self.info["num_targets_reached"] = self.waypoints.num_targets_reached
         else:
             # adversary closing bonus
             # compute current ego position
             ego_pos = self.aviary.state(self.ego_index)[-1]
             prev_adv    = np.array(self.adv_traj[-1])
             prev_ego    = np.array(self.ego_traj[-1])
-            prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
-            curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
-            close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
-            reward     += close_r
+            # prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+            # curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+            # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
+            curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
+            reward     -= curr_dist_ae
             # catch bonus?
             if curr_dist_ae < 0.3:
                 reward += self.catch_reward

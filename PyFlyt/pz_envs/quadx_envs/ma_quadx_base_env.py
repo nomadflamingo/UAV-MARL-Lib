@@ -218,6 +218,16 @@ class MAQuadXBaseEnv(ParallelEnv):
         self.step_count = 0
         self.agents = self.possible_agents[:]
 
+        # handle drone options
+        if drone_options is None:
+            drone_options = [dict() for _ in range(self.num_possible_agents)]
+        elif isinstance(drone_options, dict):
+            drone_options = [drone_options for _ in range(self.num_possible_agents)]
+
+        if self.render_mode:
+            drone_options[0]["use_camera"] = True
+            drone_options[0]["camera_fps"] = int(120 / self.env_step_ratio)
+
         # rebuild the environment
         self.aviary = Aviary(
             start_pos=self.start_pos,

@@ -110,8 +110,6 @@ def make_env(train_agent_id: int, seed: int, n_envs: int):
         return env
     return _init
 
-# EGO_MODEL_PATH = "./checkpoints/adv/adv_sac_500000_steps.zip"
-# ADV_MODEL_PATH = "./checkpoints/ego/ego_sac_500000_steps.zip"
 
 if __name__ == "__main__":
     os.environ["WANDB_MODE"] = "disabled"
