@@ -241,7 +241,6 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         # reward = v_norm - dist_norm + shape_r - tp + boundary_r
         reward = shape_r + boundary_r
 
-
         # bonus on event
         if agent_id == self.ego_index:
             # progress fraction

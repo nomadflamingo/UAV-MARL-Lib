@@ -99,9 +99,9 @@ class SelfPlayEnv(gym.Env):
     def render(self, *args, **kwargs):
         return self.ma_env.render(*args, **kwargs)
 
-def make_env(train_agent_id: int, seed: int, n_envs: int):
+def make_env(train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
     def _init():
-        ma_env    = CombatWaypointPursuitEnv(render_mode=None)
+        ma_env    = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
         ma_env.reset()
         random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
         env       = SelfPlayEnv(ma_env, train_agent_id, random_opp)
@@ -109,14 +109,14 @@ def make_env(train_agent_id: int, seed: int, n_envs: int):
         return env
     return _init
 
-def train(load_model):
+def train(load_model, flight_mode):
     os.environ["WANDB_MODE"] = "disabled"
 
     wandb.init(
         project="combat_pursuit",
         name="sac_selfplay_parallel",
         config={
-            "total_timesteps": int(1e7),
+            "total_timesteps": int(1e4),
             "update_interval": 1_000,
             "n_envs": 8,
         },
@@ -129,10 +129,10 @@ def train(load_model):
 
     # — Build vectorized envs for ego (agent 0) and adv (agent 1)
     vec_ego = VecMonitor(
-        DummyVecEnv([make_env(0, seed=42, n_envs=n_envs) for _ in range(n_envs)])
+        DummyVecEnv([make_env(0, seed=42, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
     )
     vec_adv = VecMonitor(
-        DummyVecEnv([make_env(1, seed=4242, n_envs=n_envs) for _ in range(n_envs)])
+        DummyVecEnv([make_env(1, seed=4242, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
     )
 
     if load_model:
@@ -225,7 +225,8 @@ if __name__ == "__main__":
     #### Define and parse (optional) arguments for the script ##
     parser = argparse.ArgumentParser(description='Flight script using CtrlAviary and Model Predictive Control')
     parser.add_argument('--retrain',               default=False,               type=str2bool,      help='Loads a previously trained model for more learning (default: False)', metavar='')
+    parser.add_argument('--flight_mode',           default=0,                   type=int,           help='Interger defined flight mode for Quadcopter (default: 0 -> vp, vq, vr, T)', metavar='')
 
     ARGS = parser.parse_args()
 
-    train(ARGS)
+    train(**vars(ARGS))
