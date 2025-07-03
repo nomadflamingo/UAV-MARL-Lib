@@ -12,6 +12,10 @@ from wandb.integration.sb3 import WandbCallback
 
 from PyFlyt.pz_envs import CombatWaypointPursuitEnv
 
+# Globals
+DEFAULT_RETRAIN = False
+DEFAULT_FLIGHT_MODE = 0
+
 # ————————————————————————————————————————————————————————————————
 class RandomPolicy:
     """A dummy policy that returns random actions from a given action_space."""
@@ -109,7 +113,7 @@ def make_env(train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
         return env
     return _init
 
-def train(load_model, flight_mode):
+def train(load_model=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
     os.environ["WANDB_MODE"] = "disabled"
 
     wandb.init(
@@ -224,8 +228,8 @@ def str2bool(val):
 if __name__ == "__main__":
     #### Define and parse (optional) arguments for the script ##
     parser = argparse.ArgumentParser(description='Flight script using CtrlAviary and Model Predictive Control')
-    parser.add_argument('--retrain',               default=False,               type=str2bool,      help='Loads a previously trained model for more learning (default: False)', metavar='')
-    parser.add_argument('--flight_mode',           default=0,                   type=int,           help='Interger defined flight mode for Quadcopter (default: 0 -> vp, vq, vr, T)', metavar='')
+    parser.add_argument('--retrain',               default=DEFAULT_RETRAIN,               type=str2bool,      help='Loads a previously trained model for more learning (default: False)', metavar='')
+    parser.add_argument('--flight_mode',           default=DEFAULT_FLIGHT_MODE,                   type=int,           help='Interger defined flight mode for Quadcopter (default: 0 -> vp, vq, vr, T)', metavar='')
 
     ARGS = parser.parse_args()
 
