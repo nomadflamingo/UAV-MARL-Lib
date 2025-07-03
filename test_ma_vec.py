@@ -3,6 +3,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import wandb
+import argparse
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
@@ -20,7 +21,6 @@ class RandomPolicy:
     def predict(self, obs, deterministic=True):
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
-
 
 class SelfPlayEnv(gym.Env):
     """
@@ -99,7 +99,6 @@ class SelfPlayEnv(gym.Env):
     def render(self, *args, **kwargs):
         return self.ma_env.render(*args, **kwargs)
 
-
 def make_env(train_agent_id: int, seed: int, n_envs: int):
     def _init():
         ma_env    = CombatWaypointPursuitEnv(render_mode=None)
@@ -110,8 +109,7 @@ def make_env(train_agent_id: int, seed: int, n_envs: int):
         return env
     return _init
 
-
-if __name__ == "__main__":
+def train(load_model):
     os.environ["WANDB_MODE"] = "disabled"
 
     wandb.init(
@@ -137,31 +135,36 @@ if __name__ == "__main__":
         DummyVecEnv([make_env(1, seed=4242, n_envs=n_envs) for _ in range(n_envs)])
     )
 
-    # — Instantiate SAC on each VecEnv
-    model_ego = SAC(
-        policy="MultiInputPolicy",
-        env=vec_ego,
-        verbose=1,
-        tensorboard_log="./tensorboard/ego/",
-    )
-    model_adv = SAC(
-        policy="MultiInputPolicy",
-        env=vec_adv,
-        verbose=1,
-        tensorboard_log="./tensorboard/adv/",
-    )
-
-    # model_ego = SAC.load(EGO_MODEL_PATH)
-    # model_adv = SAC.load(ADV_MODEL_PATH)
+    if load_model:
+        print("[INFO] Loading an model to retrain.")
+        EGO_MODEL_PATH = './checkpoints/ego/ego_sac_750000_steps'
+        ADV_MODEL_PATH = './checkpoints/adv/adv_sac_750000_steps'
+        model_ego = SAC.load(EGO_MODEL_PATH, env=vec_ego)
+        model_adv = SAC.load(ADV_MODEL_PATH, env=vec_adv)
+    else:
+        print("[INFO] Training a new model.")
+        # — Instantiate SAC on each VecEnv
+        model_ego = SAC(
+            policy="MultiInputPolicy",
+            env=vec_ego,
+            verbose=1,
+            tensorboard_log="./tensorboard/ego/",
+        )
+        model_adv = SAC(
+            policy="MultiInputPolicy",
+            env=vec_adv,
+            verbose=1,
+            tensorboard_log="./tensorboard/adv/",
+        )
 
     # — Callbacks
     checkpoint_ego = CheckpointCallback(
-        save_freq=250_000 // n_envs,
+        save_freq=200_000 // n_envs,
         save_path="./checkpoints/ego/",
         name_prefix="ego_sac"
     )
     checkpoint_adv = CheckpointCallback(
-        save_freq=250_000 // n_envs,
+        save_freq=200_000 // n_envs,
         save_path="./checkpoints/adv/",
         name_prefix="adv_sac"
     )
@@ -193,3 +196,36 @@ if __name__ == "__main__":
     model_ego.save("./final_models/ego_sac_parallel")
     model_adv.save("./final_models/adv_sac_parallel")
     wandb.finish()
+
+
+def str2bool(val):
+    """Converts a string into a boolean.
+
+    Parameters
+    ----------
+    val : str | bool
+        Input value (possibly string) to interpret as boolean.
+
+    Returns
+    -------
+    bool
+        Interpretation of `val` as True or False.
+
+    """
+    if isinstance(val, bool):
+        return val
+    elif val.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif val.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("[ERROR] in str2bool(), a Boolean value is expected")
+    
+if __name__ == "__main__":
+    #### Define and parse (optional) arguments for the script ##
+    parser = argparse.ArgumentParser(description='Flight script using CtrlAviary and Model Predictive Control')
+    parser.add_argument('--retrain',               default=False,               type=str2bool,      help='Loads a previously trained model for more learning (default: False)', metavar='')
+
+    ARGS = parser.parse_args()
+
+    train(ARGS)

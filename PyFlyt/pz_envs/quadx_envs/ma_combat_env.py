@@ -6,6 +6,7 @@ from gymnasium import spaces
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os
+import time
 
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_base_env import MAQuadXBaseEnv
 from PyFlyt.gym_envs.utils.waypoint_handler import WaypointHandler
@@ -54,6 +55,8 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         # Save target config for padding
         self.num_targets = num_targets
         self.target_dim = 4 if use_yaw_targets else 3
+        
+        self.agent_hz = agent_hz
 
         # Setup starting positions and orientations
         start_pos = np.vstack([ego_start_pos, adv_start_pos])
@@ -130,6 +133,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
     def compute_observation_by_id(self, agent_id: int) -> dict[str, np.ndarray]:
         """Compute observation for a single agent by ID and pad waypoint deltas."""
+        # print(f"Agent ID: {agent_id}")
         raw = self.compute_attitude_by_id(agent_id)
         # self.attitudes = np.stack(self.aviary.all_states, axis=0)
         aux = self.aviary.aux_state(agent_id)
@@ -343,9 +347,33 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
     def render(self):
         """Render the environment and waypoints."""
-        super().render()
-        if self.render_mode:
-            self.waypoints.render()
+        # super().render()
+        # if self.render_mode:
+        #     self.waypoints.render()
+
+        # if self.render:
+        #     elapsed = time.time() - self.now
+        #     self.now = time.time()
+
+        #     self._sim_elapsed += self.step_period
+        #     self._frame_elapsed += elapsed
+
+        #     time.sleep(max(self._sim_elapsed - self._frame_elapsed, 0.0))
+
+        #     # print RTF every 0.5 seconds, this actually adds considerable overhead
+        #     if self._frame_elapsed >= 0.5:
+        #         # calculate real time factor based on realtime/simtime
+        #         RTF = self._sim_elapsed / (self._frame_elapsed + 1e-6)
+        #         self._sim_elapsed = 0.0
+        #         self._frame_elapsed = 0.0
+
+        #         self.rtf_debug_line = self.addUserDebugText(
+        #             text=f"RTF: {RTF:.3f}",
+        #             textPosition=[0, 0, 0],
+        #             textColorRGB=[1, 0, 0],
+        #             replaceItemUniqueId=self.rtf_debug_line,
+        #         )
+        print('please render')
 
     def render_trajectory(self, save_path: str = None):
         """Plot 3D trajectories for ego and adversary, and current target."""
