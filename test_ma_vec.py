@@ -113,7 +113,7 @@ def make_env(train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
         return env
     return _init
 
-def train(load_model=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
+def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
     os.environ["WANDB_MODE"] = "disabled"
 
     wandb.init(
@@ -139,7 +139,7 @@ def train(load_model=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
         DummyVecEnv([make_env(1, seed=4242, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
     )
 
-    if load_model:
+    if retrain:
         print("[INFO] Loading an model to retrain.")
         EGO_MODEL_PATH = './checkpoints/ego/ego_sac_750000_steps'
         ADV_MODEL_PATH = './checkpoints/adv/adv_sac_750000_steps'
