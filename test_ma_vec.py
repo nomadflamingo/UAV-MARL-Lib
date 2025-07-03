@@ -89,6 +89,9 @@ class SelfPlayEnv(gym.Env):
         })
         self._last_obs = obs_dict
 
+        print(obs_dict)
+        exit()
+
         obs  = obs_dict[ag_train]
         rew  = rewards[ag_train]
         # done = bool(terms[ag_train] or truncs[ag_train])
