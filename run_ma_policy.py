@@ -91,8 +91,8 @@ class SelfPlayEnv(gym.Env):
 
 if __name__ == "__main__":
 
-    EGO_MODEL_PATH = './checkpoints/ego/ego_sac_1750000_steps'
-    ADV_MODEL_PATH = './checkpoints/adv/adv_sac_1750000_steps'
+    EGO_MODEL_PATH = './final_models/ego_sac_parallel'
+    ADV_MODEL_PATH = './final_models/adv_sac_parallel'
 
     model_ego = SAC.load(EGO_MODEL_PATH)
     model_adv = SAC.load(ADV_MODEL_PATH)
@@ -101,8 +101,8 @@ if __name__ == "__main__":
     env = CombatWaypointPursuitEnv(render_mode="human")
     obs, _ = env.reset()
 
-    print(obs)
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # print(obs)
+    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # === Main loop ===
     while True:

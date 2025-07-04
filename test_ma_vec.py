@@ -122,7 +122,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
         project="combat_pursuit",
         name="sac_selfplay_parallel",
         config={
-            "total_timesteps": int(1e6),
+            "total_timesteps": int(5e6),
             "update_interval": 1_000,
             "n_envs": 8,
         },
@@ -143,8 +143,8 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
 
     if retrain:
         print("[INFO] Loading an model to retrain.")
-        EGO_MODEL_PATH = './checkpoints/ego/ego_sac_750000_steps'
-        ADV_MODEL_PATH = './checkpoints/adv/adv_sac_750000_steps'
+        EGO_MODEL_PATH = './final_models/ego_sac_xyz1000'
+        ADV_MODEL_PATH = './final_models/adv_sac_xyz1000'
         model_ego = SAC.load(EGO_MODEL_PATH, env=vec_ego)
         model_adv = SAC.load(ADV_MODEL_PATH, env=vec_adv)
     else:
@@ -165,12 +165,12 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
 
     # — Callbacks
     checkpoint_ego = CheckpointCallback(
-        save_freq=200_000 // n_envs,
+        save_freq=250_000 // n_envs,
         save_path="./checkpoints/ego/",
         name_prefix="ego_sac"
     )
     checkpoint_adv = CheckpointCallback(
-        save_freq=200_000 // n_envs,
+        save_freq=250_000 // n_envs,
         save_path="./checkpoints/adv/",
         name_prefix="adv_sac"
     )
