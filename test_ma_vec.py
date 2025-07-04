@@ -89,8 +89,7 @@ class SelfPlayEnv(gym.Env):
         })
         self._last_obs = obs_dict
 
-        print(obs_dict)
-        exit()
+        
 
         obs  = obs_dict[ag_train]
         rew  = rewards[ag_train]
@@ -123,7 +122,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE):
         project="combat_pursuit",
         name="sac_selfplay_parallel",
         config={
-            "total_timesteps": int(1e4),
+            "total_timesteps": int(1e6),
             "update_interval": 1_000,
             "n_envs": 8,
         },
