@@ -65,7 +65,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
                                  eval_freq=int(1000),
                                  deterministic=True,
                                  render=False)
-    model.learn(total_timesteps=int(5e7),
+    model.learn(total_timesteps=int(1e8),
                 callback=eval_callback,
                 log_interval=100)
     
