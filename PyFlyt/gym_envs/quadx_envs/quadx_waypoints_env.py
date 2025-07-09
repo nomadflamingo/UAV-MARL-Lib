@@ -92,15 +92,21 @@ class QuadXWaypointsEnv(QuadXBaseEnv):
         self.observation_space = spaces.Dict(
             {
                 "attitude": self.combined_space,
-                "target_deltas": spaces.Sequence(
-                    space=spaces.Box(
-                        low=-2 * flight_dome_size,
-                        high=2 * flight_dome_size,
-                        shape=(4,) if use_yaw_targets else (3,),
-                        dtype=np.float64,
-                    ),
-                    stack=True,
-                ),
+                # "target_deltas": spaces.Sequence(
+                #     space=spaces.Box(
+                #         low=-2 * flight_dome_size,
+                #         high=2 * flight_dome_size,
+                #         shape=(4,) if use_yaw_targets else (3,),
+                #         dtype=np.float64,
+                #     ),
+                #     stack=True,
+                # ),
+                "target_deltas": spaces.Box(
+                    low=-2 * flight_dome_size,
+                    high=2 * flight_dome_size,
+                    shape=(4, 3),
+                    dtype=np.float64
+                    )
             }
         )
 
@@ -168,9 +174,26 @@ class QuadXWaypointsEnv(QuadXBaseEnv):
                 axis=-1,
             )
 
-        new_state["target_deltas"] = self.waypoints.distance_to_targets(
-            ang_pos, lin_pos, quaternion
-        )
+        # new_state["target_deltas"] = self.waypoints.distance_to_targets(
+        #     ang_pos, lin_pos, quaternion
+        # )
+
+        raw_deltas = self.waypoints.distance_to_targets(ang_pos, lin_pos, quaternion)
+        if raw_deltas.ndim == 1:
+            raw_deltas = raw_deltas.reshape(1, -1)
+
+        num_targets = 4
+        target_dim = raw_deltas.shape[1] if raw_deltas.shape[0] > 0 else 3
+
+        if raw_deltas.shape[0] < num_targets:
+            pad_len = num_targets - raw_deltas.shape[0]
+            pad = np.zeros((pad_len, target_dim), dtype=raw_deltas.dtype)
+            deltas = np.vstack([raw_deltas, pad])
+        else:
+            deltas = raw_deltas[:num_targets]
+
+        new_state["target_deltas"] = deltas
+
 
         self.state: dict[Literal["attitude", "target_deltas"], np.ndarray] = new_state
 
