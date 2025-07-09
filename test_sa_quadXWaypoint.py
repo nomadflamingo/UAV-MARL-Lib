@@ -54,7 +54,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
                 verbose=1)
     
     # Target cumulative rewards
-    target_reward = 500
+    target_reward = 350
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=target_reward,
                                                      verbose=1)
     eval_callback = EvalCallback(eval_env,
@@ -65,7 +65,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
                                  eval_freq=int(1000),
                                  deterministic=True,
                                  render=False)
-    model.learn(total_timesteps=int(1e7),
+    model.learn(total_timesteps=int(5e7),
                 callback=eval_callback,
                 log_interval=100)
     
