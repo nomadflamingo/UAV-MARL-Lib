@@ -77,6 +77,7 @@ class QuadXWaypointsEnv(QuadXBaseEnv):
         )
 
         # define waypoints
+        random_waypoints = np.random.default_rng(seed=42)
         self.waypoints = WaypointHandler(
             enable_render=self.render_mode is not None,
             num_targets=num_targets,
@@ -109,6 +110,8 @@ class QuadXWaypointsEnv(QuadXBaseEnv):
                     )
             }
         )
+
+        self.agent_hz = agent_hz
 
         """ ENVIRONMENT CONSTANTS """
         self.sparse_reward = sparse_reward
