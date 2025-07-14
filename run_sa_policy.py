@@ -43,7 +43,7 @@ def main():
     print("\n\n\nMean reward ", mean_reward, " +- ", std_reward, "\n\n")
 
     # Simulation
-    obs, info = test_env.reset(seed=22) # 6, 7 9, $16, *17, 
+    obs, info = test_env.reset(seed=22)
 
     while True:
     # for i in range(200):

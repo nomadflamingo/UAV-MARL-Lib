@@ -39,7 +39,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
     train_env = make_vec_env(
                                 QuadXWaypointsEnv,
                                 env_kwargs=dict(render_mode=None, flight_mode=flight_mode),
-                                n_envs=1,
+                                n_envs=1, # Increase
                                 seed=0
                             )
     eval_env = QuadXWaypointsEnv(render_mode=None, flight_mode=flight_mode)
@@ -54,7 +54,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
                 verbose=1)
     
     # Target cumulative rewards
-    target_reward = 350
+    target_reward = 400
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=target_reward,
                                                      verbose=1)
     eval_callback = EvalCallback(eval_env,
