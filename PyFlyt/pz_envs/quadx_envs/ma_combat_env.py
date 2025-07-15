@@ -102,6 +102,9 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             ),
         })
 
+        self.max_reward_inc = 10                                # Maximum reward per step
+        self.max_reward = self.max_reward_inc * self.max_steps  # Maximum reward per episode
+
         # Trajectory logs
         self.ego_traj: list[np.ndarray] = []
         self.adv_traj: list[np.ndarray] = []
@@ -241,6 +244,20 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         # reward = v_norm - dist_norm + shape_r - tp + boundary_r
         reward = shape_r + boundary_r
 
+        # safety termination condition: crash or dome violation
+        x, y, z = lin_pos
+        crashed = z <= 0.0
+        outside_dome = np.linalg.norm(lin_pos) > self.flight_dome_size+0.5
+
+        if crashed or outside_dome:
+            term = True
+            info["crashed"] = crashed
+            info["outside_dome"] = outside_dome
+            reward -= 10.0  # penalty for violating safety
+            reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
+            reward = reward/self.max_reward
+            return term, trunc, reward, info
+
         # bonus on event
         if agent_id == self.ego_index:
             # progress fraction
@@ -275,7 +292,8 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
                 term = True
 
         # clip
-        reward = float(np.clip(reward, -10.0, 10.0))
+        reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
+        reward = reward/self.max_reward
         return term, trunc, reward, info
     
     def step(self, actions: dict[str, np.ndarray]) -> tuple[

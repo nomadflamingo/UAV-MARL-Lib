@@ -29,13 +29,7 @@ def make_flat_env():
 
 def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT_OUTPUT_FOLDER):
 
-    # Filename
-    filename = os.path.join(output_folder, 'save-'+datetime.now().strftime("%m.%d.%Y_%H.%M.%S"))
-    if not os.path.exists(filename):
-        os.makedirs(filename+'/')
-
     # Initiate Environment
-
     train_env = make_vec_env(
                                 QuadXWaypointsEnv,
                                 env_kwargs=dict(render_mode=None, flight_mode=flight_mode),
@@ -47,11 +41,25 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
     print('[INFO] Action Space:', train_env.action_space)
     print('[INFO] Observation Space:', train_env.observation_space)
 
-    # Train the model
-    model = SAC(policy='MultiInputPolicy',
-                env=train_env,
-                tensorboard_log=filename+'/tb/',
-                verbose=1)
+    if retrain:
+        print("[INFO] Loading an model to retrain.")
+        filename = './results/save-07.14.2025_22.12.56'
+        if not os.path.exists(filename):
+            os.makedirs(filename+'/')
+        MODEL_PATH = './results/save-07.14.2025_22.12.56/best_model'
+        model = SAC.load(MODEL_PATH, env=train_env)
+
+    else:
+    # Filename
+        filename = os.path.join(output_folder, 'save-'+datetime.now().strftime("%m.%d.%Y_%H.%M.%S"))
+        if not os.path.exists(filename):
+            os.makedirs(filename+'/')
+        
+        # Train the model
+        model = SAC(policy='MultiInputPolicy',
+                    env=train_env,
+                    tensorboard_log=filename+'/tb/',
+                    verbose=1)
     
     # Target cumulative rewards
     target_reward = 380
@@ -65,7 +73,7 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
                                  eval_freq=int(1000),
                                  deterministic=True,
                                  render=False)
-    model.learn(total_timesteps=int(5e7),
+    model.learn(total_timesteps=int(1e7),
                 callback=eval_callback,
                 log_interval=100)
     
