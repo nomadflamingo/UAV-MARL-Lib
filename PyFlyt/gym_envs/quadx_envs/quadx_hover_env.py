@@ -32,7 +32,7 @@ class QuadXHoverEnv(QuadXBaseEnv):
         sparse_reward: bool = False,
         flight_mode: int = 0,
         flight_dome_size: float = 3.0,
-        max_duration_seconds: float = 10.0,
+        max_duration_seconds: float = 15.0,
         angle_representation: Literal["euler", "quaternion"] = "quaternion",
         agent_hz: int = 40,
         render_mode: None | Literal["human", "rgb_array"] = None,

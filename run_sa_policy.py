@@ -21,6 +21,7 @@ def main():
     # Load Model
     output_folder = 'results'
     filename = 'save-07.09.2025_01.05.40'
+    # /home/nathan/Desktop/PyFlyt/results/save-07.09.2025_01.05.40/final_model.zip
     filename = os.path.join(output_folder, filename)
     print(filename)
 
@@ -32,9 +33,11 @@ def main():
 
     model = SAC.load(path)
 
+    flight_mode = int(0)
+
     # Initiate test environment 
-    test_env = QuadXWaypointsEnv(render_mode="human", flight_mode=int(0))
-    test_env_no_gui = QuadXWaypointsEnv(render_mode=None, flight_mode=int(0))
+    test_env = QuadXWaypointsEnv(render_mode="human", flight_mode=flight_mode)
+    test_env_no_gui = QuadXWaypointsEnv(render_mode=None, flight_mode=flight_mode)
 
     mean_reward, std_reward = evaluate_policy(model,
                                               test_env_no_gui,
@@ -43,7 +46,7 @@ def main():
     print("\n\n\nMean reward ", mean_reward, " +- ", std_reward, "\n\n")
 
     # Simulation
-    obs, info = test_env.reset(seed=22)
+    obs, info = test_env.reset(seed=7)
 
     while True:
     # for i in range(200):
