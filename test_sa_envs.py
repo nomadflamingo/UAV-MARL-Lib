@@ -7,6 +7,7 @@ import gymnasium as gym
 from gymnasium.wrappers import FlattenObservation
 import numpy as np
 import torch
+print("numpy version=", np.__version__)
 
 # Stable baselines
 from stable_baselines3 import PPO, SAC
