@@ -61,6 +61,8 @@ class QuadXHoverEnv(QuadXBaseEnv):
             render_resolution=render_resolution,
         )
 
+        self.agent_hz = agent_hz
+
         """GYMNASIUM STUFF"""
         self.observation_space = self.combined_space
 
@@ -77,7 +79,29 @@ class QuadXHoverEnv(QuadXBaseEnv):
             options: None
 
         """
+        # super().begin_reset(seed, options)
+        # super().end_reset(seed, options)
+
+        # return self.state, self.info
+
+        # Define randomization bounds
+        pos_low = np.array([-0.5, -0.5, 0.01])
+        pos_high = np.array([0.5, 0.5, 1.4])
+        orn_low = np.array([-0.1, -0.1, -3.0])
+        orn_high = np.array([0.1, 0.1, 3.0])
+
+        # Randomly sample position and orientation
+        random_pos = np.random.uniform(low=pos_low, high=pos_high, size=(1, 3))
+        random_orn = np.random.uniform(low=orn_low, high=orn_high, size=(1, 3))
+
+        # Apply randomized start state
+        self.start_pos = random_pos
+        self.start_orn = random_orn
+
+        # Call standard reset logic
         super().begin_reset(seed, options)
+
+        # Complete the rest of the reset
         super().end_reset(seed, options)
 
         return self.state, self.info
@@ -119,7 +143,7 @@ class QuadXHoverEnv(QuadXBaseEnv):
         super().compute_base_term_trunc_reward()
         if not self.sparse_reward:
             # distance from 0, 0, 1 hover point
-            linear_distance = np.linalg.norm(
+            linear_distance = 3.0 * np.linalg.norm(
                 self.env.state(0)[-1] - np.array([0.0, 0.0, 1.0])
             )
             # Negative Reward For High Yaw rate, To prevent high yaw while training

@@ -40,7 +40,7 @@ def train(env=DEFAULT_ENV, retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_M
     env_class = ENV_REGISTRY[env]
     if env == 'hover':
         policy = 'MlpPolicy'
-        target_reward = 500
+        target_reward = 2000
     elif env == 'waypoints':
         policy = 'MultiInputPolicy'
         target_reward = 380

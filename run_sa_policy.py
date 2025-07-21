@@ -1,4 +1,5 @@
 import os
+import argparse
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
@@ -12,18 +13,37 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
-# Pyflyt
+# Pyflyt 
+from PyFlyt.gym_envs.quadx_envs.quadx_hover_env import QuadXHoverEnv
 from PyFlyt.gym_envs.quadx_envs.quadx_waypoints_env import QuadXWaypointsEnv
 
-def main():
+# Global Defaults
+ENV_REGISTRY = {
+    "hover": QuadXHoverEnv,
+    "waypoints": QuadXWaypointsEnv,
+}
+
+DEFAULT_ENV = 'waypoints'
+DEFAULT_RETRAIN = False
+DEFAULT_FLIGHT_MODE = 0
+DEFAULT_OUTPUT_FOLDER = 'results'
+
+def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT_OUTPUT_FOLDER):
     print('[INFO] Starting Simulation...')
 
     # Load Model
-    output_folder = 'results'
-    filename = 'save-07.09.2025_01.05.40'
-    # /home/nathan/Desktop/PyFlyt/results/save-07.09.2025_01.05.40/final_model.zip
-    filename = os.path.join(output_folder, filename)
-    print(filename)
+    if env == 'waypoints':
+        filename = 'save-07.09.2025_01.05.40'
+        # /home/nathan/Desktop/PyFlyt/results/save-07.09.2025_01.05.40/final_model.zip
+        filename = os.path.join(output_folder, filename)
+    elif env == 'hover':
+        filename = 'save-hover-0-07.21.2025_10.40'
+        filename = os.path.join(output_folder, filename)
+    else:
+        print("[ERROR]: no file specified for the environment", env)
+        exit()
+
+    print("[INFO] Loading model from", filename)
 
     if os.path.isfile(filename+'/best_model.zip'):
         path = filename+'/best_model.zip'
@@ -33,11 +53,10 @@ def main():
 
     model = SAC.load(path)
 
-    flight_mode = int(0)
-
     # Initiate test environment 
-    test_env = QuadXWaypointsEnv(render_mode="human", flight_mode=flight_mode)
-    test_env_no_gui = QuadXWaypointsEnv(render_mode=None, flight_mode=flight_mode)
+    env_class = ENV_REGISTRY[env]
+    test_env = env_class(render_mode="human", flight_mode=flight_mode)
+    test_env_no_gui = env_class(render_mode=None, flight_mode=flight_mode)
 
     mean_reward, std_reward = evaluate_policy(model,
                                               test_env_no_gui,
@@ -46,7 +65,11 @@ def main():
     print("\n\n\nMean reward ", mean_reward, " +- ", std_reward, "\n\n")
 
     # Simulation
-    obs, info = test_env.reset(seed=7)
+    obs, info = test_env.reset(seed=None)
+    print("[INFO] Obs:", obs)
+    print("[INFO] Start Pos:", test_env.start_pos)
+
+    exit()
 
     while True:
     # for i in range(200):
@@ -70,8 +93,21 @@ def main():
     # Plot
 
 
-if __name__ == "__main__":
-    main()
-    
+def str2bool(val):
+    if isinstance(val, bool):
+        return val
+    if val.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif val.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Single agent reinforcement learning in PyFlyt Gymnasium Environments")
+    parser.add_argument('--env',           default=DEFAULT_ENV,           type=str,      help='Single agent gymnasium environment to train (default: hover).')
+    parser.add_argument('--flight_mode',   default=DEFAULT_FLIGHT_MODE,   type=int,      help='Flight mode (0=default).')
+    parser.add_argument('--output_folder', default=DEFAULT_OUTPUT_FOLDER, type=str,      help='Folder where to save logs (default: "results")', metavar='')
+    ARGS = parser.parse_args()
+    main(**vars(ARGS))
 
    
