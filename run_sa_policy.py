@@ -69,8 +69,6 @@ def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT
     print("[INFO] Obs:", obs)
     print("[INFO] Start Pos:", test_env.start_pos)
 
-    exit()
-
     while True:
     # for i in range(200):
         action, _states = model.predict(obs,
