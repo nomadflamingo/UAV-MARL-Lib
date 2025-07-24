@@ -41,7 +41,7 @@ def train(env=DEFAULT_ENV, retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_M
     env_class = ENV_REGISTRY[env]
     if env == 'hover':
         policy = 'MlpPolicy'
-        target_reward = 2000
+        target_reward = 1600
     elif env == 'waypoints':
         policy = 'MultiInputPolicy'
         target_reward = 380
@@ -67,7 +67,6 @@ def train(env=DEFAULT_ENV, retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_M
             os.makedirs(filename+'/')
         MODEL_PATH = './results/save-07.14.2025_22.12.56/best_model'
         model = SAC.load(MODEL_PATH, env=train_env)
-
     else:
         print("[INFO] Creating a new model...")
         # Filename

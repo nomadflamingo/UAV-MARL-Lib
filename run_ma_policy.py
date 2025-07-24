@@ -91,8 +91,8 @@ class SelfPlayEnv(gym.Env):
 
 if __name__ == "__main__":
 
-    EGO_MODEL_PATH = './checkpoints/adv/adv_sac_3500000_steps'
-    ADV_MODEL_PATH = './checkpoints/adv/adv_sac_3500000_steps'
+    EGO_MODEL_PATH = './checkpoints/ego/ego_sac_4500000_steps'
+    ADV_MODEL_PATH = './checkpoints/adv/adv_sac_4500000_steps'
 
     model_ego = SAC.load(EGO_MODEL_PATH)
     model_adv = SAC.load(ADV_MODEL_PATH)

@@ -97,7 +97,7 @@ class WaypointHandler:
                         self.targ_obj_dir,
                         basePosition=target,
                         useFixedBase=True,
-                        globalScaling=self.goal_reach_distance / 4.0,
+                        globalScaling=self.goal_reach_distance / 2.0,
                     )
                 )
 

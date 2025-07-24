@@ -11,7 +11,7 @@ import time
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_base_env import MAQuadXBaseEnv
 from PyFlyt.gym_envs.utils.waypoint_handler import WaypointHandler
 
-class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
+class CombatWaypointPursuitEnv2(MAQuadXBaseEnv):
     """
     Multi-Agent Combat Waypoint Pursuit Environment.
 
@@ -24,7 +24,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         self,
         ego_start_pos: np.ndarray = np.array([[0.0, 0.0, 1.0]]),
         adv_start_pos: np.ndarray = np.array([[2.0, 2.0, 1.0]]),
-        max_lin_vel: float        = 5.0,   # expected max linear speed
+        max_lin_vel: float        = 5.0,    # expected max linear speed
         time_penalty: float       = 0.01,   # per-step penalty
         shaping_coeff: float      = 1.0,    # for ego potential shaping
         closing_coeff: float      = 1.0,    # for adv closing bonus
@@ -48,9 +48,14 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         self.closing_coeff    = closing_coeff
         self.waypoint_reward  = waypoint_reward
         self.catch_reward     = catch_reward
+
+        self.n_ego = ego_start_pos.shape[0]
+        self.n_adv = adv_start_pos.shape[0]
+        self.n_agents = self.n_ego + self.n_adv
+
         # Indices for ego and adversary
-        self.ego_index = 0
-        self.adv_index = 1
+        self.ego_indices = list(range(self.n_ego))
+        self.adv_indices = list(range(self.n_ego, self.n_agents))
 
         # Save target config for padding
         self.num_targets = num_targets
@@ -106,8 +111,8 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         self.max_reward = self.max_reward_inc * self.max_steps  # Maximum reward per episode
 
         # Trajectory logs
-        self.ego_traj: list[np.ndarray] = []
-        self.adv_traj: list[np.ndarray] = []
+        self.ego_traj = {i: [] for i in self.ego_indices}
+        self.adv_traj = {i: [] for i in self.adv_indices}
 
     def observation_space(self, agent: Any = None) -> spaces.Space:
         """Return the per-agent observation space."""
@@ -126,6 +131,9 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         self.ego_traj.clear()
         self.adv_traj.clear()
         super().end_reset()
+
+        self.agents = [f"ego_{i}" for i in self.ego_indices] + [f"adv_{i}" for i in self.adv_indices]
+        self.agent_name_mapping = {name: i for i, name in enumerate(self.agents)}
 
         observations = {
             ag: self.compute_observation_by_id(self.agent_name_mapping[ag])
@@ -187,10 +195,10 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
         # Log current position for trajectory
         pos = lin_pos.copy()
-        if agent_id == self.ego_index:
-            self.ego_traj.append(pos)
+        if agent_id in self.ego_indices:
+            self.ego_traj[agent_id].append(pos)
         else:
-            self.adv_traj.append(pos)
+            self.adv_traj[agent_id].append(pos)
 
         return {"attitude": attitude, "target_deltas": deltas}
 
@@ -216,10 +224,10 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         dist_norm = curr_dist / self.flight_dome_size
 
         # 3) find previous position
-        if agent_id == self.ego_index:
-            prev_pos = np.array(self.ego_traj[-1])
+        if agent_id in self.ego_indices:
+            prev_pos = np.array(self.ego_traj[agent_id][-1])
         else:
-            prev_pos = np.array(self.adv_traj[-1])
+            prev_pos = np.array(self.adv_traj[agent_id][-1])
 
         # recompute target point:  wp = curr_pos + curr_delta
         target_pt = lin_pos + curr_delta[:3]
@@ -227,7 +235,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
         # 4) shaping reward (ego only)
         shape_r = 0.0
-        if agent_id == self.ego_index:
+        if agent_id in self.ego_indices:
             # shape_r = self.shaping_coeff * (prev_dist - curr_dist) / self.flight_dome_size
             shape_r =  - curr_dist
         # 5) time penalty
@@ -276,20 +284,28 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
                 # self.info["num_targets_reached"] = self.waypoints.num_targets_reached
                 term = True # Waypoint reached
         else:
-            # adversary closing bonus
-            # compute current ego position
-            ego_pos = self.aviary.state(self.ego_index)[-1]
-            prev_adv    = np.array(self.adv_traj[-1])
-            prev_ego    = np.array(self.ego_traj[-1])
-            # prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
-            # curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
-            # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
-            curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
-            reward     -= curr_dist_ae
-            # catch bonus?
-            if curr_dist_ae < 0.3:
+            # # adversary closing bonus
+            # # compute current ego position
+            # ego_pos = self.aviary.state(self.ego_index)[-1]
+            # prev_adv    = np.array(self.adv_traj[-1])
+            # prev_ego    = np.array(self.ego_traj[-1])
+            # # prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+            # # curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+            # # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
+            # curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
+            # reward     -= curr_dist_ae
+            # # catch bonus?
+            # if curr_dist_ae < 0.3:
+            #     reward += self.catch_reward
+            #     info["ego_caught"] = True
+            #     term = True
+            # For adversaries, reward closing distance to nearest ego
+            ego_positions = [self.aviary.state(eid)[-1] for eid in self.ego_indices]
+            ego_dists = [np.linalg.norm(lin_pos - ep) for ep in ego_positions]
+            min_dist = min(ego_dists)
+            reward -= min_dist
+            if min_dist < 0.3:
                 reward += self.catch_reward
-                info["ego_caught"] = True
                 term = True
 
         # clip

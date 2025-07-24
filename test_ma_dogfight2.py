@@ -1,5 +1,7 @@
 import os
 import wandb
+import argparse
+from datetime import datetime
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import CheckpointCallback
 
@@ -16,9 +18,7 @@ class RandomPolicy:
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
 
-
-if __name__ == "__main__":
-
+def train():
     # 1) Initialize W&B (metrics only)
     wandb.init(
         project="combat_pursuit",
@@ -29,6 +29,12 @@ if __name__ == "__main__":
             "checkpoint_freq": 250_000
         },
     )
+
+    output_folder = 'dogFight'
+
+    filename = os.path.join(output_folder, 'save-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
+    if not os.path.exists(filename):
+        os.makedirs(filename+'/')
 
     # 2) Shared multi-agent env
     ma_env = MAFixedwingDogfightEnvV2(render_mode=None)
@@ -42,7 +48,7 @@ if __name__ == "__main__":
         policy="MlpPolicy",
         env=env_ego,
         verbose=1,
-        tensorboard_log="./logs_fwing/tensorboard_ego_wing/",
+        tensorboard_log=filename+"/tensorboard_ego_wing/",
     )
 
     env_adv = SelfPlayEnvWings(ma_env, train_agent_id=1, opp_policy=random_opp)
@@ -50,20 +56,20 @@ if __name__ == "__main__":
         policy="MlpPolicy",
         env=env_adv,
         verbose=1,
-        tensorboard_log="./logs_fwing/tensorboard_adv_wing/",
+        tensorboard_log=filename+"/tensorboard_adv_wing/",
     )
 
     # 5) Checkpoint + W&B callbacks
     checkpoint_ego = CheckpointCallback(
         save_freq=250_000,
-        save_path="./logs_fwing/checkpoints_wing/ego/",
+        save_path=filename+"/checkpoints_wing/ego/",
         name_prefix="ego_sac"
     )
 
     # Adv checkpoints → ./checkpoints/adv/
     checkpoint_adv = CheckpointCallback(
         save_freq=250_000,
-        save_path="./logs_fwing/checkpoints_wing/adv/",
+        save_path=filename+"/checkpoints_wing/adv/",
         name_prefix="adv_sac"
     )
     wandb_cb = WandbCallback(verbose=2, model_save_path=None)
@@ -99,6 +105,10 @@ if __name__ == "__main__":
         ma_env.render_trajectory(f"./logs_fwing/trajectories_wing/adv_{it:04d}.png")
 
     # 7) Final save & cleanup
-    model_ego.save("./logs_fwing/final_wing_models/ego_sac_final")
-    model_adv.save("./logs_fwing/final_wing_models/adv_sac_final")
+    model_ego.save(filename+"/final_wing_models/ego_sac_final")
+    model_adv.save(filename+"/final_wing_models/adv_sac_final")
     wandb.finish()
+    return
+
+if __name__ == "__main__":
+    train()

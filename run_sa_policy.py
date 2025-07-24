@@ -1,6 +1,7 @@
 import os
 import argparse
 import numpy as np
+print(np.__version__)
 import gymnasium as gym
 from gymnasium import spaces
 import wandb
@@ -37,7 +38,7 @@ def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT
         # /home/nathan/Desktop/PyFlyt/results/save-07.09.2025_01.05.40/final_model.zip
         filename = os.path.join(output_folder, filename)
     elif env == 'hover':
-        filename = 'save-hover-0-07.21.2025_10.40'
+        filename = 'save-hover-0-07.21.2025_11.35'
         filename = os.path.join(output_folder, filename)
     else:
         print("[ERROR]: no file specified for the environment", env)
@@ -45,8 +46,8 @@ def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT
 
     print("[INFO] Loading model from", filename)
 
-    if os.path.isfile(filename+'/best_model.zip'):
-        path = filename+'/best_model.zip'
+    if os.path.isfile(filename+'/final_model.zip'):
+        path = filename+'/final_model.zip'
     else:
         print("[ERROR]: no model under the specified path", filename)
         exit()
@@ -55,7 +56,7 @@ def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT
 
     # Initiate test environment 
     env_class = ENV_REGISTRY[env]
-    test_env = env_class(render_mode="human", flight_mode=flight_mode)
+    test_env = env_class(render_mode="human", flight_mode=flight_mode, max_duration_seconds=15.0)
     test_env_no_gui = env_class(render_mode=None, flight_mode=flight_mode)
 
     mean_reward, std_reward = evaluate_policy(model,
@@ -65,7 +66,7 @@ def main(env=DEFAULT_ENV, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT
     print("\n\n\nMean reward ", mean_reward, " +- ", std_reward, "\n\n")
 
     # Simulation
-    obs, info = test_env.reset(seed=None)
+    obs, info = test_env.reset(seed=7)
     print("[INFO] Obs:", obs)
     print("[INFO] Start Pos:", test_env.start_pos)
 
