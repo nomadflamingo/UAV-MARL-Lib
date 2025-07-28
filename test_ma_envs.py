@@ -147,7 +147,7 @@ def train(env=DEFAULT_ENV,
           trained_folder='name',
           num_agents=2,
           total_timesteps=int(1e6),
-          update_interval=100_000,
+          update_interval=50_000,
           n_envs=8):
     
     print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment.")
