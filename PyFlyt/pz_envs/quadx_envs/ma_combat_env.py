@@ -80,7 +80,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             use_yaw_targets=use_yaw_targets,
             goal_reach_distance=goal_reach_distance,
             goal_reach_angle=goal_reach_angle,
-            flight_dome_size=flight_dome_size,
+            flight_dome_size=flight_dome_size*0.8,
             min_height=0.1,
             np_random=np.random.default_rng(),
         )
@@ -194,55 +194,120 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
         return {"attitude": attitude, "target_deltas": deltas}
 
+    # def compute_term_trunc_reward_info_by_id(self, agent_id: int):
+    #     """Compute termination, truncation, reward and info for one agent."""
+    #     raw = self.compute_attitude_by_id(agent_id)
+    #     _, ang_pos, lin_vel, lin_pos, quat = raw
+
+    #     # default flags
+    #     trunc = self.step_count > self.max_steps
+    #     term  = False
+    #     info  = {}
+
+    #     # 1) normalized agility
+    #     v_norm = (np.linalg.norm(lin_vel) / self.max_lin_vel)
+
+    #     # 2) compute delta to next waypoint (vector from curr_pos → wp)
+    #     if len(self.waypoints.targets)==0:
+    #         curr_delta = np.zeros((self.target_dim,),dtype=np.float64)
+    #     else:
+    #         curr_delta = np.asarray(self.waypoints.distance_to_targets(ang_pos, lin_pos, quat))#[0]
+    #     curr_dist = float(np.linalg.norm(curr_delta[:3]))
+    #     dist_norm = curr_dist / self.flight_dome_size
+
+    #     # 3) find previous position
+    #     if agent_id == self.ego_index:
+    #         prev_pos = np.array(self.ego_traj[-1])
+    #     else:
+    #         prev_pos = np.array(self.adv_traj[-1])
+
+    #     # recompute target point:  wp = curr_pos + curr_delta
+    #     target_pt = lin_pos + curr_delta[:3]
+    #     prev_dist = np.linalg.norm(prev_pos - target_pt)
+
+    #     # 4) shaping reward (ego only)
+    #     shape_r = 0.0
+    #     if agent_id == self.ego_index:
+    #         # shape_r = self.shaping_coeff * (prev_dist - curr_dist) / self.flight_dome_size
+    #         shape_r =  - curr_dist
+    #     # 5) time penalty
+    #     tp = self.time_penalty
+
+    #     # now build raw reward
+    #     # some thing dumb 
+    #     yaw = ang_pos[-1]
+    #     dist_origin = float(np.linalg.norm(lin_pos))
+
+    #     boundary_r  = np.tanh(0.1 * yaw       - 1.0)
+    #     boundary_r -= np.tanh(0.0025 * dist_origin - 1.0)
+
+    #     # reward = v_norm - dist_norm + shape_r - tp + boundary_r
+    #     reward = shape_r + boundary_r
+
+    #     # safety termination condition: crash or dome violation
+    #     x, y, z = lin_pos
+    #     crashed = z <= 0.0
+    #     outside_dome = np.linalg.norm(lin_pos) > self.flight_dome_size+0.5
+
+    #     if crashed or outside_dome:
+    #         term = True
+    #         info["crashed"] = crashed
+    #         info["outside_dome"] = outside_dome
+    #         reward -= 10.0  # penalty for violating safety
+    #         reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
+    #         reward = reward/self.max_reward
+    #         return term, trunc, reward, info
+
+    #     # bonus on event
+    #     if agent_id == self.ego_index:
+    #         # progress fraction
+    #         prog = self.waypoints.progress_to_next_target
+    #         reward += max(3.0 * prog, 0.0)
+    #         reward += max(1.0 / self.waypoints.distance_to_next_target, 0.0)
+    #         # waypoint reached?
+    #         if curr_dist < self.waypoints.goal_reach_distance:
+    #             reward += self.waypoint_reward
+    #             info["waypoint_reached"] = True
+    #             self.waypoints.advance_targets()
+    #             # self.truncation |= self.waypoints.all_targets_reached
+    #             info['num_targets_reached'] = self.waypoints.num_targets_reached
+    #             info['env_complete'] = self.waypoints.all_targets_reached
+    #             if self.waypoints.all_targets_reached:
+    #                 term = True
+    #             # self.info["env_complete"] = self.waypoints.all_targets_reached
+    #             # self.info["num_targets_reached"] = self.waypoints.num_targets_reached
+    #     else:
+    #         # adversary closing bonus
+    #         # compute current ego position
+    #         ego_pos = self.aviary.state(self.ego_index)[-1]
+    #         prev_adv    = np.array(self.adv_traj[-1])
+    #         prev_ego    = np.array(self.ego_traj[-1])
+    #         # prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+    #         # curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+    #         # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
+    #         curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
+    #         reward     -= curr_dist_ae
+    #         # catch bonus?
+    #         if curr_dist_ae < 0.3:
+    #             reward += self.catch_reward
+    #             info["ego_caught"] = True
+    #             term = True
+
+    #     # clip
+    #     reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
+    #     reward = reward/self.max_reward
+    #     return term, trunc, reward, info
+    
     def compute_term_trunc_reward_info_by_id(self, agent_id: int):
         """Compute termination, truncation, reward and info for one agent."""
         raw = self.compute_attitude_by_id(agent_id)
-        _, ang_pos, lin_vel, lin_pos, quat = raw
+        ang_vel, ang_pos, lin_vel, lin_pos, quat = raw
 
         # default flags
         trunc = self.step_count > self.max_steps
         term  = False
         info  = {}
-
-        # 1) normalized agility
-        v_norm = (np.linalg.norm(lin_vel) / self.max_lin_vel)
-
-        # 2) compute delta to next waypoint (vector from curr_pos → wp)
-        if len(self.waypoints.targets)==0:
-            curr_delta = np.zeros((self.target_dim,),dtype=np.float64)
-        else:
-            curr_delta = np.asarray(self.waypoints.distance_to_targets(ang_pos, lin_pos, quat))#[0]
-        curr_dist = float(np.linalg.norm(curr_delta[:3]))
-        dist_norm = curr_dist / self.flight_dome_size
-
-        # 3) find previous position
-        if agent_id == self.ego_index:
-            prev_pos = np.array(self.ego_traj[-1])
-        else:
-            prev_pos = np.array(self.adv_traj[-1])
-
-        # recompute target point:  wp = curr_pos + curr_delta
-        target_pt = lin_pos + curr_delta[:3]
-        prev_dist = np.linalg.norm(prev_pos - target_pt)
-
-        # 4) shaping reward (ego only)
-        shape_r = 0.0
-        if agent_id == self.ego_index:
-            # shape_r = self.shaping_coeff * (prev_dist - curr_dist) / self.flight_dome_size
-            shape_r =  - curr_dist
-        # 5) time penalty
-        tp = self.time_penalty
-
-        # now build raw reward
-        # some thing dumb 
-        yaw = ang_pos[-1]
-        dist_origin = float(np.linalg.norm(lin_pos))
-
-        boundary_r  = np.tanh(0.1 * yaw       - 1.0)
-        boundary_r -= np.tanh(0.0025 * dist_origin - 1.0)
-
-        # reward = v_norm - dist_norm + shape_r - tp + boundary_r
-        reward = shape_r + boundary_r
+        reward = 0
 
         # safety termination condition: crash or dome violation
         x, y, z = lin_pos
@@ -253,36 +318,69 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             term = True
             info["crashed"] = crashed
             info["outside_dome"] = outside_dome
-            reward -= 10.0  # penalty for violating safety
-            reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
-            reward = reward/self.max_reward
+            reward -= 100.0  # penalty for violating safety
             return term, trunc, reward, info
+        
+        if agent_id == self.ego_index:
+            prog_2_next_targ = self.waypoints.progress_to_next_target
+            dist_2_next_targ = self.waypoints.distance_to_next_target
+        else: 
+            ego_pos = self.aviary.state(self.ego_index)[-1]
+            prev_adv    = np.array(self.adv_traj[-1])
+            prev_ego    = np.array(self.ego_traj[-1])
+            prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+            curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+            if np.any(np.isinf(prev_dist_ae + curr_dist_ae)):
+                prog_2_next_targ = 0.0
+            else:
+                prog_2_next_targ = prev_dist_ae - curr_dist_ae
+            dist_2_next_targ = curr_dist_ae
+
+        # bonus reward if we are not sparse
+        if not self.sparse_reward:
+            reward += max(float(3.0 * prog_2_next_targ), 0.0)
+            reward += 0.1 / dist_2_next_targ
+            # Negative Reward For High Yaw rate, To prevent high yaw while training
+            yaw_rate = abs(
+                ang_vel[2]
+            )  # Assuming z-axis is the last component
+            yaw_rate_penalty = 0.01 * yaw_rate**2  # Add penalty for high yaw rate
+            reward -= (
+                yaw_rate_penalty  # You can adjust the coefficient (0.01) as needed
+            )
+        # target reached
+        if agent_id == self.ego_index and self.waypoints.target_reached:
+            reward = 100.0
+            # advance the targets
+            self.waypoints.advance_targets()
+            # update infos and dones
+            trunc |= self.waypoints.all_targets_reached
+            info["env_complete"] = self.waypoints.all_targets_reached
+            info["num_targets_reached"] = self.waypoints.num_targets_reached
+            if self.waypoints.all_targets_reached:
+                term = True
+        elif agent_id == self.adv_index and dist_2_next_targ < 1.5*self.waypoints.goal_reach_distance:
+            reward = 200.0
+            info["ego_caught"] = True
+            info["env_complete"] = self.waypoints.all_targets_reached
+            term = True
+
+        return term, trunc, reward, info
+        
 
         # bonus on event
         if agent_id == self.ego_index:
             # progress fraction
             prog = self.waypoints.progress_to_next_target
-            reward += max(3.0 * prog, 0.0)
-            reward += max(1.0 / self.waypoints.distance_to_next_target, 0.0)
-            # waypoint reached?
-            if curr_dist < self.waypoints.goal_reach_distance:
-                reward += self.waypoint_reward
-                info["waypoint_reached"] = True
-                self.waypoints.advance_targets()
-                # self.truncation |= self.waypoints.all_targets_reached
-                info['num_targets_reached'] = self.waypoints.num_targets_reached
-                info['env_complete'] = self.waypoints.all_targets_reached
-                # self.info["env_complete"] = self.waypoints.all_targets_reached
-                # self.info["num_targets_reached"] = self.waypoints.num_targets_reached
-                term = True # Waypoint reached
+
         else:
             # adversary closing bonus
             # compute current ego position
             ego_pos = self.aviary.state(self.ego_index)[-1]
             prev_adv    = np.array(self.adv_traj[-1])
             prev_ego    = np.array(self.ego_traj[-1])
-            # prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
-            # curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+            prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+            curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
             # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
             curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
             reward     -= curr_dist_ae
@@ -295,7 +393,8 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         # clip
         reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
         reward = reward/self.max_reward
-        return term, trunc, reward, info
+        return reward
+        
     
     def step(self, actions: dict[str, np.ndarray]) -> tuple[
         dict[str, Any],
