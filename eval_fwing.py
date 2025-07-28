@@ -4,9 +4,12 @@ import imageio.v2 as imageio
 from stable_baselines3 import SAC
 from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
 
-# Paths to your saved models
-EGO_MODEL_PATH = "./logs_fwing/checkpoints_wing/adv/adv_sac_250000_steps.zip"
-ADV_MODEL_PATH = "./logs_fwing/checkpoints_wing/ego/ego_sac_250000_steps.zip"
+# # Paths to your saved models
+# EGO_MODEL_PATH = "./logs_fwing/checkpoints_wing/adv/adv_sac_250000_steps.zip"
+# ADV_MODEL_PATH = "./logs_fwing/checkpoints_wing/ego/ego_sac_250000_steps.zip"
+EGO_MODEL_PATH = "./dogFight/save-07.23.2025_22.28/final_wing_models/ego_sac_final.zip"
+# ADV_MODEL_PATH = "./dogFight/save-07.23.2025_22.28/final_wing_models/adv_sac_final.zip"
+ADV_MODEL_PATH = "./dogFight/save-07.23.2025_22.28/checkpoints_wing/adv/adv_sac_3500000_steps.zip"
 
 def make_env(render_mode: str = "human"):
     return MAFixedwingDogfightEnvV2(render_mode=render_mode)
