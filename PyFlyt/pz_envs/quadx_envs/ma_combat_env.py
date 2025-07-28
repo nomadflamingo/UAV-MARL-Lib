@@ -33,7 +33,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         sparse_reward: bool = False,
         num_targets: int = 1,
         use_yaw_targets: bool = False,
-        goal_reach_distance: float = 0.2,
+        goal_reach_distance: float = 0.1,
         goal_reach_angle: float = 0.1,
         flight_mode: int = 0,
         flight_dome_size: float = 5.0,
@@ -120,6 +120,22 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
     def reset(
         self, *, seed: None | int = None, options: None | dict[str, Any] = None
     ):
+        random_ego = np.array([[0.0, 0.0, 0.0]])
+        random_adv = np.array([[0.0, 0.0, 0.0]])
+        # Define randomization bounds
+        pos_low = np.array([-0.5, -0.5, 0.2])
+        pos_high = np.array([0.5, 0.5, 1.4])
+        orn_low = np.array([-0.1, -0.1, -3.0])
+        orn_high = np.array([0.1, 0.1, 3.0])
+
+        while np.linalg.norm(random_ego - random_adv) < 2.0*self.waypoints.goal_reach_distance:
+            # Randomly sample position and orientation
+            random_ego = np.random.uniform(low=pos_low, high=pos_high, size=(1, 3))
+            random_adv = np.random.uniform(low=orn_low, high=orn_high, size=(1, 3))
+
+        # Apply randomized start state
+        self.start_pos  = np.vstack([random_ego, random_adv])
+
         super().begin_reset(seed, options)
         # Reset waypoints and clear trajectories
         self.waypoints.reset(self.aviary, np.random.default_rng())
@@ -307,19 +323,24 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         trunc = self.step_count > self.max_steps
         term  = False
         info  = {}
-        reward = 0
+        total_reward = 0
+
+        crash_reward = 0
+        catch_reward = 0
+        prog_reward = 0 
+        dist_reward = 0 
+        yaw_penalty = 0
 
         # safety termination condition: crash or dome violation
         x, y, z = lin_pos
-        crashed = z <= 0.0
-        outside_dome = np.linalg.norm(lin_pos) > self.flight_dome_size+0.5
+        crashed = z <= 0.05
+        outside_dome = np.linalg.norm(lin_pos) > self.flight_dome_size+1.0
 
         if crashed or outside_dome:
             term = True
             info["crashed"] = crashed
             info["outside_dome"] = outside_dome
-            reward -= 100.0  # penalty for violating safety
-            return term, trunc, reward, info
+            crash_reward = -200.0  # penalty for violating safety
         
         if agent_id == self.ego_index:
             prog_2_next_targ = self.waypoints.progress_to_next_target
@@ -338,19 +359,19 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
         # bonus reward if we are not sparse
         if not self.sparse_reward:
-            reward += max(float(3.0 * prog_2_next_targ), 0.0)
-            reward += 0.1 / dist_2_next_targ
+            prog_reward = max(float(3.0 * prog_2_next_targ), 0.0)
+            dist_reward = 0.1 / dist_2_next_targ
             # Negative Reward For High Yaw rate, To prevent high yaw while training
             yaw_rate = abs(
                 ang_vel[2]
             )  # Assuming z-axis is the last component
             yaw_rate_penalty = 0.01 * yaw_rate**2  # Add penalty for high yaw rate
-            reward -= (
+            yaw_penalty = (
                 yaw_rate_penalty  # You can adjust the coefficient (0.01) as needed
             )
         # target reached
         if agent_id == self.ego_index and self.waypoints.target_reached:
-            reward = 100.0
+            catch_reward = 100.0
             # advance the targets
             self.waypoints.advance_targets()
             # update infos and dones
@@ -360,12 +381,24 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             if self.waypoints.all_targets_reached:
                 term = True
         elif agent_id == self.adv_index and dist_2_next_targ < 1.5*self.waypoints.goal_reach_distance:
-            reward = 200.0
+            catch_reward = 200.0
             info["ego_caught"] = True
             info["env_complete"] = self.waypoints.all_targets_reached
             term = True
 
-        return term, trunc, reward, info
+        total_reward = crash_reward + catch_reward + prog_reward + dist_reward - yaw_penalty
+
+        reward_components = {
+            "crash_penalty": crash_reward,
+            "catch_reward": catch_reward,
+            "prog_reward": prog_reward,
+            "dist_reward": dist_reward,
+            "yaw_penalty": yaw_penalty,
+        }
+
+        info["reward_components"] = reward_components
+
+        return term, trunc, total_reward, info
         
 
         # bonus on event

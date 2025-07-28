@@ -33,6 +33,21 @@ DEFAULT_RETRAIN = False
 DEFAULT_FLIGHT_MODE = 0
 DEFAULT_OUTPUT_FOLDER = 'results/ma'
 
+from stable_baselines3.common.callbacks import BaseCallback, CallbackList
+from stable_baselines3.common.logger import Logger
+
+class RewardLoggingCallback(BaseCallback):
+    def __init__(self, verbose=0):
+        super().__init__(verbose)
+
+    def _on_step(self) -> bool:
+        infos = self.locals["infos"]
+        for info in infos:
+            if "reward_components" in info:
+                for key, value in info["reward_components"].items():
+                    self.logger.record(f"reward_components/{key}", value)
+        return True
+
 class RandomPolicy:
     """A dummy policy that returns random actions from a given action_space."""
     def __init__(self, action_space):
@@ -203,6 +218,7 @@ def train(env=DEFAULT_ENV,
 
     ### CALLBACKS ###
     callbacks = {}
+    reward_logger = RewardLoggingCallback()
     for agent_id in agent_ids:
         callbacks[agent_id] = [
             EvalCallback(
@@ -217,7 +233,8 @@ def train(env=DEFAULT_ENV,
                 save_freq=250_000 // n_envs,
                 save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
                 name_prefix=f"agent_{agent_id}"
-            )
+            ),
+            RewardLoggingCallback()
         ]
 
     ### TRAINING LOOP ###

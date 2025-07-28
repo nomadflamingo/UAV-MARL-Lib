@@ -9,8 +9,8 @@ from PyFlyt.pz_envs import CombatWaypointPursuitEnv
 # ADV_MODEL_PATH = "./checkpoints_f3/adv/adv_sac_1500000_steps.zip"
 
 
-EGO_MODEL_PATH = "./checkpoints/ego/ego_sac_3750000_steps.zip"
-ADV_MODEL_PATH = "./checkpoints/adv/adv_sac_3750000_steps.zip"
+EGO_MODEL_PATH = "./results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip"
+ADV_MODEL_PATH = "./results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip"
 
 def make_env(render_mode: str = "human"):
     return CombatWaypointPursuitEnv(render_mode=render_mode)
