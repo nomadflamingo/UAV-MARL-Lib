@@ -91,15 +91,24 @@ class SelfPlayEnv(gym.Env):
 
 if __name__ == "__main__":
 
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip'
+    # EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip'
+    # ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip'
+    # Second attempt
+    EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_0_model.zip'
+    ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_1_model.zip'
+    # RA
+    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_0_model.zip'
+    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_1_model.zip'
+    #
+    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
+    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
 
     model_ego = SAC.load(EGO_MODEL_PATH)
     model_adv = SAC.load(ADV_MODEL_PATH)
 
     # === Initialize environment with rendering enabled ===
     env = CombatWaypointPursuitEnv(render_mode="human")
-    obs, _ = env.reset()
+    obs, _ = env.reset(seed=7)
 
     # print(obs)
     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")

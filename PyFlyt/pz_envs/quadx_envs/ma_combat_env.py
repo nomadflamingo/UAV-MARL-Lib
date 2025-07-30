@@ -120,6 +120,12 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
     def reset(
         self, *, seed: None | int = None, options: None | dict[str, Any] = None
     ):
+        if seed is not None:
+            self._np_random = np.random.default_rng(seed)
+        elif not hasattr(self, "_np_random"):
+            # fallback for when no seed is ever passed
+            self._np_random = np.random.default_rng()
+
         random_ego = np.array([[0.0, 0.0, 0.0]])
         random_adv = np.array([[0.0, 0.0, 0.0]])
         # Define randomization bounds
@@ -130,15 +136,15 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
 
         while np.linalg.norm(random_ego - random_adv) < 2.0*self.waypoints.goal_reach_distance:
             # Randomly sample position and orientation
-            random_ego = np.random.uniform(low=pos_low, high=pos_high, size=(1, 3))
-            random_adv = np.random.uniform(low=orn_low, high=orn_high, size=(1, 3))
+            random_ego = self._np_random.uniform(low=pos_low, high=pos_high, size=(1, 3))
+            random_adv = self._np_random.uniform(low=orn_low, high=orn_high, size=(1, 3))
 
         # Apply randomized start state
         self.start_pos  = np.vstack([random_ego, random_adv])
 
         super().begin_reset(seed, options)
         # Reset waypoints and clear trajectories
-        self.waypoints.reset(self.aviary, np.random.default_rng())
+        self.waypoints.reset(self.aviary, self._np_random)
         self.ego_traj.clear()
         self.adv_traj.clear()
         super().end_reset()
@@ -325,7 +331,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         info  = {}
         total_reward = 0
 
-        crash_reward = 0
+        crash_penalty = 0
         catch_reward = 0
         prog_reward = 0 
         dist_reward = 0 
@@ -340,7 +346,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             term = True
             info["crashed"] = crashed
             info["outside_dome"] = outside_dome
-            crash_reward = -200.0  # penalty for violating safety
+            crash_penalty = -200.0  # penalty for violating safety
         
         if agent_id == self.ego_index:
             prog_2_next_targ = self.waypoints.progress_to_next_target
@@ -365,8 +371,8 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             yaw_rate = abs(
                 ang_vel[2]
             )  # Assuming z-axis is the last component
-            yaw_rate_penalty = 0.01 * yaw_rate**2  # Add penalty for high yaw rate
-            yaw_penalty = (
+            yaw_rate_penalty = 0.001 * yaw_rate**2  # Add penalty for high yaw rate
+            yaw_penalty = -(
                 yaw_rate_penalty  # You can adjust the coefficient (0.01) as needed
             )
         # target reached
@@ -386,47 +392,47 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
             info["env_complete"] = self.waypoints.all_targets_reached
             term = True
 
-        total_reward = crash_reward + catch_reward + prog_reward + dist_reward - yaw_penalty
+        total_reward = crash_penalty + catch_reward + prog_reward + dist_reward + yaw_penalty
 
-        reward_components = {
-            "crash_penalty": crash_reward,
-            "catch_reward": catch_reward,
-            "prog_reward": prog_reward,
-            "dist_reward": dist_reward,
-            "yaw_penalty": yaw_penalty,
-        }
+        # reward_components = {
+        #     "crash_penalty": crash_reward,
+        #     "catch_reward": catch_reward,
+        #     "prog_reward": prog_reward,
+        #     "dist_reward": dist_reward,
+        #     "yaw_penalty": yaw_penalty,
+        # }
 
-        info["reward_components"] = reward_components
+        # info["reward_components"] = reward_components
 
-        return term, trunc, total_reward, info
+        return term, trunc, info, crash_penalty, catch_reward, prog_reward, dist_reward, yaw_penalty
         
 
-        # bonus on event
-        if agent_id == self.ego_index:
-            # progress fraction
-            prog = self.waypoints.progress_to_next_target
+        # # bonus on event
+        # if agent_id == self.ego_index:
+        #     # progress fraction
+        #     prog = self.waypoints.progress_to_next_target
 
-        else:
-            # adversary closing bonus
-            # compute current ego position
-            ego_pos = self.aviary.state(self.ego_index)[-1]
-            prev_adv    = np.array(self.adv_traj[-1])
-            prev_ego    = np.array(self.ego_traj[-1])
-            prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
-            curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
-            # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
-            curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
-            reward     -= curr_dist_ae
-            # catch bonus?
-            if curr_dist_ae < 0.3:
-                reward += self.catch_reward
-                info["ego_caught"] = True
-                term = True
+        # else:
+        #     # adversary closing bonus
+        #     # compute current ego position
+        #     ego_pos = self.aviary.state(self.ego_index)[-1]
+        #     prev_adv    = np.array(self.adv_traj[-1])
+        #     prev_ego    = np.array(self.ego_traj[-1])
+        #     prev_dist_ae= np.linalg.norm(prev_adv - prev_ego)
+        #     curr_dist_ae= np.linalg.norm(lin_pos - ego_pos)
+        #     # close_r     = self.closing_coeff * (prev_dist_ae - curr_dist_ae) / self.flight_dome_size
+        #     curr_dist_ae = float(np.linalg.norm(lin_pos - ego_pos))
+        #     reward     -= curr_dist_ae
+        #     # catch bonus?
+        #     if curr_dist_ae < 0.3:
+        #         reward += self.catch_reward
+        #         info["ego_caught"] = True
+        #         term = True
 
-        # clip
-        reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
-        reward = reward/self.max_reward
-        return reward
+        # # clip
+        # reward = float(np.clip(reward, -self.max_reward_inc, self.max_reward_inc))
+        # reward = reward/self.max_reward
+        # return reward
         
     
     def step(self, actions: dict[str, np.ndarray]) -> tuple[
@@ -459,6 +465,11 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         terminations = {k: False for k in self.agents}
         truncations = {k: False for k in self.agents}
         rewards = {k: 0.0 for k in self.agents}
+        crash_penaltys = {k: 0.0 for k in self.agents}
+        catch_rewards = {k: 0.0 for k in self.agents}
+        prog_rewards = {k: 0.0 for k in self.agents}
+        dist_rewards = {k: 0.0 for k in self.agents}
+        yaw_penalties = {k: 0.0 for k in self.agents}
         infos = {k: dict() for k in self.agents}
 
         # step enough times for one RL step
@@ -472,12 +483,29 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
                 ag_id = self.agent_name_mapping[ag]
 
                 # compute term trunc reward
-                term, trunc, rew, info = self.compute_term_trunc_reward_info_by_id(
+                term, trunc, info, crash_penalty, catch_reward, prog_reward, dist_reward, yaw_penalty = self.compute_term_trunc_reward_info_by_id(
                     ag_id
                 )
+
+                rew = crash_penalty + catch_reward + prog_reward + dist_reward + yaw_penalty
+
                 terminations[ag] |= term
                 truncations[ag] |= trunc
                 rewards[ag] += rew
+                crash_penaltys[ag] += crash_penalty
+                catch_rewards[ag] += catch_reward
+                prog_rewards[ag] += prog_reward
+                dist_rewards[ag] += dist_reward
+                yaw_penalties[ag] += yaw_penalty 
+                if terminations[ag] or truncations[ag]:
+                    reward_components = {
+                        "crash_penalty": crash_penalty,
+                        "catch_reward": catch_reward,
+                        "prog_reward": prog_reward,
+                        "dist_reward": dist_reward,
+                        "yaw_penalty": yaw_penalty,
+                    }
+                    info["reward_components"] = reward_components
                 infos[ag].update(info)
 
                 # compute observations

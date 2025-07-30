@@ -161,8 +161,8 @@ def train(env=DEFAULT_ENV,
           output_folder=DEFAULT_OUTPUT_FOLDER, 
           trained_folder='name',
           num_agents=2,
-          total_timesteps=int(1e6),
-          update_interval=50_000,
+          total_timesteps=int(2e7),
+          update_interval=100_000,
           n_envs=8):
     
     print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment.")
@@ -187,6 +187,7 @@ def train(env=DEFAULT_ENV,
         exit()
 
     # Create File 
+    save_dir = os.path.join(output_folder, env)
     save_dir = os.path.join(output_folder, 'save-'+env+'-'+str(flight_mode)+'-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
@@ -205,7 +206,11 @@ def train(env=DEFAULT_ENV,
         print(f'[INFO] Agent {agent_id} observation space:', vec_envs[agent_id].observation_space)
 
         # Create evaluation environments
-        eval_envs[agent_id] = make_env(ma_env, agent_id, seed=1000 + agent_id, n_envs=1, flight_mode=flight_mode)()
+        eval_envs[agent_id] = VecMonitor(
+            DummyVecEnv([
+                make_env(ma_env, agent_id, seed=1000 + agent_id, n_envs=1, flight_mode=flight_mode)
+            ])
+        )
 
         # Train model
         models[agent_id] = SAC(
@@ -254,6 +259,10 @@ def train(env=DEFAULT_ENV,
                     for env in vec_envs[other_id].envs:
                         env.opp_policy = models[agent_id]
 
+            # Plot traj
+            for env in vec_envs[agent_id].envs:
+                env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_smallyaw/agent{agent_id}_{it:04d}.png"))
+
     ### SAVE FINAL MODELS ###
     for agent_id in agent_ids:
         models[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
@@ -265,13 +274,7 @@ if __name__ == "__main__":
     env = MAQuadXHoverEnv()
     parallel_api_test(env, num_cycles=1_000_000)
 
-    env = ss.black_death_v3(env)
-
-    env.reset()
-
     print(f"Starting training on {str(env.metadata['name'])}.")
-
-    env = ss.pettingzoo_env_to_vec_env_v1(env)
 
     train()
     print("[INFO] Done.")
