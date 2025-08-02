@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 import os
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-class MAFixedwingDogfightEnv(MAQuadXBaseEnv):
+class MAQuadXDogfightEnv(MAQuadXBaseEnv):
     """Team Dogfighting Environment for the Acrowing model using the PettingZoo API.
 
     Args:

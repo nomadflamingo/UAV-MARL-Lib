@@ -24,7 +24,7 @@ class CombatWaypointPursuitEnv(MAQuadXBaseEnv):
         self,
         ego_start_pos: np.ndarray = np.array([[0.0, 0.0, 1.0]]),
         adv_start_pos: np.ndarray = np.array([[2.0, 2.0, 1.0]]),
-        max_lin_vel: float        = 5.0,   # expected max linear speed
+        max_lin_vel: float        = 5.0,    # expected max linear speed
         time_penalty: float       = 0.01,   # per-step penalty
         shaping_coeff: float      = 1.0,    # for ego potential shaping
         closing_coeff: float      = 1.0,    # for adv closing bonus

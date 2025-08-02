@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
+import os
 import numpy as np
 from gymnasium import spaces
+import matplotlib.pyplot as plt
 
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_base_env import MAQuadXBaseEnv
-
 
 class MAQuadXHoverEnv(MAQuadXBaseEnv):
     """Simple Multiagent Hover Environment.
@@ -85,6 +86,8 @@ class MAQuadXHoverEnv(MAQuadXBaseEnv):
             dtype=np.float64,
         )
 
+        self.agent_trajs: list[list[np.ndarray]] = [[] for _ in range(self.num_possible_agents)]
+
     def observation_space(self, agent: Any = None) -> spaces.Space:
         """observation_space.
 
@@ -109,6 +112,9 @@ class MAQuadXHoverEnv(MAQuadXBaseEnv):
         """
         super().begin_reset(seed, options)
         super().end_reset(seed, options)
+
+        for traj in self.agent_trajs:
+            traj.clear()
 
         observations = {
             ag: self.compute_observation_by_id(self.agent_name_mapping[ag])
@@ -137,6 +143,10 @@ class MAQuadXHoverEnv(MAQuadXBaseEnv):
         lin_vel = raw_state[2]
         lin_pos = raw_state[3]
         ang_vel, ang_pos, lin_vel, lin_pos, quaternion = raw_state
+
+        # Log current position for trajectory
+        pos = lin_pos.copy()
+        self.agent_trajs[agent_id].append(pos)
 
         # depending on angle representation, return the relevant thing
         if self.angle_representation == 0:
@@ -204,3 +214,30 @@ class MAQuadXHoverEnv(MAQuadXBaseEnv):
             reward += 1.0
 
         return term, trunc, reward, info
+
+    def render_trajectory(self, save_path: str = None):
+        """Plot 3D trajectories for ego and adversary, and current target."""
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        for i, traj in enumerate(self.agent_trajs):
+            if len(traj) > 0:
+                traj_np = np.array(traj)
+                ax.plot(traj_np[:, 0], traj_np[:, 1], traj_np[:, 2], label=f"Agent {i}")
+
+
+        # if len(self.ego_traj) > 0:
+        #     last_pos = self.ego_traj[-1]
+        #     _, ang_pos, _, _, quat = self.compute_attitude_by_id(self.ego_index)
+        #     delta = self.waypoints.distance_to_targets(ang_pos, last_pos, quat)
+        #     current_delta = delta[0] if delta.shape[0] > 0 else np.zeros(self.target_dim)
+        #     target_pt = last_pos + current_delta[:3]
+        #     ax.scatter(*target_pt, color="red", marker="x", s=100, label="Next Target")
+
+        ax.set_xlabel("X"); ax.set_ylabel("Y"); ax.set_zlabel("Z")
+        ax.legend(); ax.set_title("Trajectories")
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path)
+        else:
+            plt.show()
+        plt.close()

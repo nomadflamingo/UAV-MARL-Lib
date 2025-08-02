@@ -3,38 +3,42 @@ import wandb
 import argparse
 import numpy as np
 from datetime import datetime
+# SB3
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
-from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
-from pettingzoo.test import parallel_api_test
-
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, CheckpointCallback
+# Gym
 import gymnasium as gym
 from gymnasium import spaces
-
+# Envs
 from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
 from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
-
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
+# pz
 from pettingzoo.test import parallel_api_test
+# SP
+from PyFlyt.marl_wrappers.selfplay import SelfPlayEnv, MASelfPlayEnv
 
-import supersuit as ss
-from wandb.integration.sb3 import WandbCallback
-os.environ["WANDB_MODE"] = "disabled"  
 
 # Global Defaults
 ENV_REGISTRY = {
-    "dogfight": MAFixedwingDogfightEnvV2,
-    "combat": CombatWaypointPursuitEnv,
+    "dogfight_FW": MAFixedwingDogfightEnvV2,
+    "dogfight_QX": MAQuadXDogfightEnv,       # Implementation not finished
+    "combat": CombatWaypointPursuitEnv,      # Results Questionable
     "hover": MAQuadXHoverEnv,
 }
 
-DEFAULT_ENV = 'combat'
+DEFAULT_ENV = 'hover'
 DEFAULT_RETRAIN = False
+DEFAULT_TRAINED_FOLDER = 'name'
 DEFAULT_FLIGHT_MODE = 0
-DEFAULT_OUTPUT_FOLDER = 'results/ma'
-
-from stable_baselines3.common.callbacks import BaseCallback, CallbackList
-from stable_baselines3.common.logger import Logger
+# DEFAULT_OUTPUT_FOLDER = 'results/ma'
+DEFAULT_OUTPUT_FOLDER = 'junk'
+DEFAULT_NUM_AGENTS = 4
+DEFAULT_TOTAL_TIMESTEPS = int(1e5)
+DEFAULT_UPDATE_INTERVAL = int(1_000)
+DEFAULT_NUM_ENVS = 8
 
 class RewardLoggingCallback(BaseCallback):
     def __init__(self, verbose=0):
@@ -57,131 +61,51 @@ class RandomPolicy:
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
     
-class SelfPlayEnv(gym.Env):
-    """
-    Wraps CombatWaypointPursuitEnv for one agent.
-    The training agent takes its action from `train_model.predict()`,
-    and the opponent from `opp_policy.predict()`.
-    """
-    def __init__(self, ma_env, train_agent_id: int, opp_policy):
-        super().__init__()
-        self.ma_env     = ma_env
-        self.train_id   = train_agent_id
-        self.opp_id     = 1 - train_agent_id
-        self.opp_policy = opp_policy
-
-        # One reset to infer observation shape
-        obs_dict, _ = self.ma_env.reset()
-        name        = self.ma_env.agents[self.train_id]
-        # print(f"OBS_DICT \n", obs_dict)
-        sample_obs  = obs_dict[name]
-        # print(f"SAMPLE_OBS \n", sample_obs)
-
-        # print(f"SAMPLE_OBS ATT SHAPE \n", sample_obs["attitude"].shape)
-        # print(f"SAMPLE_OBS DELT SHAPE \n", sample_obs["target_deltas"].shape)
-
-        # Build SB3-compatible spaces
-        if DEFAULT_ENV == 'combat':
-            self.observation_space = spaces.Dict({
-                "attitude":      spaces.Box(
-                                    low=-np.inf,
-                                    high=np.inf,
-                                    shape=sample_obs["attitude"].shape,
-                                    dtype=np.float32),
-                "target_deltas": spaces.Box(
-                                    low=-np.inf,
-                                    high=np.inf,
-                                    shape=sample_obs["target_deltas"].shape,
-                                    dtype=np.float32),
-            })
-        else:
-            self.observation_space = ma_env.observation_space(name)
-
-        self.action_space = ma_env.action_space(name)
-
-    def reset(self, *, seed=None, options=None):
-        if seed is not None or options is not None:
-            obs_dict, infos = self.ma_env.reset(seed=seed, options=options)
-        else:
-            obs_dict, infos = self.ma_env.reset()
-        name = self.ma_env.agents[self.train_id]
-        return obs_dict[name], infos.get(name, {})
-
-    def step(self, action):
-        ag_train = self.ma_env.agents[self.train_id]
-        ag_opp   = self.ma_env.agents[self.opp_id]
-
-        # opponent observation
-        opp_obs = getattr(self, "_last_obs", {}).get(ag_opp, None)
-        if opp_obs is None:
-            # fallback to sampling a random action first
-            curr_obs, rewards, terms, truncs, infos = self.ma_env.step({
-                ag_train: action,
-                ag_opp:   self.action_space.sample(),
-            })
-            opp_obs = curr_obs[ag_opp]
-        opp_action, _ = self.opp_policy.predict(opp_obs, deterministic=True)
-
-        # step multi-agent env
-        obs_dict, rewards, terms, truncs, infos = self.ma_env.step({
-            ag_train: action,
-            ag_opp:   opp_action,
-        })
-        self._last_obs = obs_dict
-
-        
-
-        obs  = obs_dict[ag_train]
-        rew  = rewards[ag_train]
-        # done = bool(terms[ag_train] or truncs[ag_train])
-        terminated = bool(terms[ag_train]   or terms[ag_opp])
-        truncated  = bool(truncs[ag_train]  or truncs[ag_opp])
-        info = infos.get(ag_train, {})
-
-        if terminated or truncated:
-            obs, info = self.reset()
-        return obs, rew, terminated, truncated, info
-
-    def render(self, *args, **kwargs):
-        return self.ma_env.render(*args, **kwargs)
-
 def make_env(ma_env, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
     def _init():
         # ma_env = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
         ma_env.reset()
-        random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
-        env = SelfPlayEnv(ma_env, train_agent_id, random_opp)
+        # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
+        opp_policies = {
+            i: RandomPolicy(ma_env.action_space(i))
+            for i in range(ma_env.num_possible_agents) if i != train_agent_id
+        }
+        env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
         env.reset(seed=seed + train_agent_id)
         return env
     return _init
 
+##### TRAINING FUNCTION #################################################################################
 def train(env=DEFAULT_ENV, 
           retrain=DEFAULT_RETRAIN, 
+          trained_folder=DEFAULT_TRAINED_FOLDER,
           flight_mode=DEFAULT_FLIGHT_MODE, 
           output_folder=DEFAULT_OUTPUT_FOLDER, 
-          trained_folder='name',
-          num_agents=2,
-          total_timesteps=int(2e7),
-          update_interval=100_000,
-          n_envs=8):
-    
-    print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment.")
+          num_agents=DEFAULT_NUM_AGENTS,
+          total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
+          update_interval=DEFAULT_UPDATE_INTERVAL,
+          n_envs=DEFAULT_NUM_ENVS,
+          strategy="double_oracle",):
+    """
+    Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
+    """
+    print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment using a \'{strategy}\' method.")
     
     agent_ids = list(range(num_agents))
     agent_names = [f"uav_{i}" for i in range(num_agents)]
 
+    #################################
     ### INITIATE THE ENVIRONMENTS ###
+    #################################
     env_class = ENV_REGISTRY[env]
     ma_env = env_class(render_mode=None, flight_mode=flight_mode)
     if env == 'hover':
-        policy = 'MultiInputPolicy'
+        policy = 'MlpPolicy'
         target_reward = 1600
     elif env == 'dogfight':
         policy = 'MultiInputPolicy'
-        target_reward = 380
     elif env == 'combat':
         policy = 'MultiInputPolicy'
-        target_reward = 380
     else:
         print("[ERROR] This environment is not currently suited to train the environment,", env)
         exit()
@@ -192,7 +116,9 @@ def train(env=DEFAULT_ENV,
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
 
-    # Load or initiate the models
+    #################################
+    ###    LOAD/INITIATE MODELS   ###
+    #################################
     vec_envs = {}
     eval_envs = {}
     models = {}
@@ -221,9 +147,10 @@ def train(env=DEFAULT_ENV,
         )
 
 
-    ### CALLBACKS ###
+    #################################
+    ###         CALLBACKS         ###
+    #################################
     callbacks = {}
-    reward_logger = RewardLoggingCallback()
     for agent_id in agent_ids:
         callbacks[agent_id] = [
             EvalCallback(
@@ -242,7 +169,12 @@ def train(env=DEFAULT_ENV,
             RewardLoggingCallback()
         ]
 
-    ### TRAINING LOOP ###
+    # Averaging buffer
+    average_policies = {agent_id: [] for agent_id in agent_ids}
+
+    #################################
+    ###       TRAINING LOOP       ###
+    #################################
     n_iters = total_timesteps // update_interval
     for it in range(1, n_iters + 1):
         for agent_id in agent_ids:
@@ -254,14 +186,34 @@ def train(env=DEFAULT_ENV,
             )
 
             # Optionally, broadcast policy to all opponents
-            for other_id in agent_ids:
-                if other_id != agent_id:
-                    for env in vec_envs[other_id].envs:
-                        env.opp_policy = models[agent_id]
+            if strategy == "double_oracle":
+                for other_id in agent_ids:
+                    if other_id != agent_id:
+                        for env in vec_envs[other_id].envs:
+                            env.opp_policy = models[agent_id]
+            elif strategy == "fictitious_play":
+                # Update average policy list
+                average_policies[agent_id].append(models[agent_id])
+                # Broadcast
+                for other_id in agent_ids:
+                    if other_id != agent_id:
+                        def sample_average_policy(agent_list):
+                            class AveragePolicy:
+                                def __init__(self, policies):
+                                    self.policies = policies
+                                def predict(self, obs, deterministic=True):
+                                    # Sample from historical best responses
+                                    policy = np.random.choice(self.policies)
+                                    return policy.predict(obs, deterministic)
+                            return AveragePolicy(agent_list)
+
+                        avg_policy = sample_average_policy(average_policies[agent_id])
+                        for env in vec_envs[other_id].envs:
+                            env.opp_policy = avg_policy
 
             # Plot traj
             for env in vec_envs[agent_id].envs:
-                env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_smallyaw/agent{agent_id}_{it:04d}.png"))
+                env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
 
     ### SAVE FINAL MODELS ###
     for agent_id in agent_ids:
@@ -270,12 +222,32 @@ def train(env=DEFAULT_ENV,
 
     return
 
-if __name__ == "__main__":
-    env = MAQuadXHoverEnv()
+
     parallel_api_test(env, num_cycles=1_000_000)
 
-    print(f"Starting training on {str(env.metadata['name'])}.")
+def str2bool(val):
+    if isinstance(val, bool):
+        return val
+    if val.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif val.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
 
-    train()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Single agent reinforcement learning in PyFlyt Gymnasium Environments")
+    parser.add_argument('--env',             default=DEFAULT_ENV,             type=str,      help='Single agent gymnasium environment to train (default: hover).')
+    parser.add_argument('--retrain',         default=DEFAULT_RETRAIN,         type=str2bool, help='Retrain existing model (default: False).')
+    parser.add_argument('--trained_folder',  default=DEFAULT_TRAINED_FOLDER,  type=str,      help='Floder inside output_folder containing model to retrain (default: name)')
+    parser.add_argument('--flight_mode',     default=DEFAULT_FLIGHT_MODE,     type=int,      help='Flight mode (0=default).')
+    parser.add_argument('--output_folder',   default=DEFAULT_OUTPUT_FOLDER,   type=str,      help='Folder where to save logs (default: "results")', metavar='')
+    parser.add_argument('--num_agents',      default=DEFAULT_NUM_AGENTS,      type=int,      help=f'Number of agents in environment (default: {DEFAULT_NUM_AGENTS})')
+    parser.add_argument('--total_timesteps', default=DEFAULT_TOTAL_TIMESTEPS, type=int,      help=f'Number of iterations to train agents over (default: {DEFAULT_TOTAL_TIMESTEPS})')
+    parser.add_argument('--update_interval', default=DEFAULT_UPDATE_INTERVAL, type=int,      help=f'Intervals for training breaks (default: {DEFAULT_UPDATE_INTERVAL})')
+    parser.add_argument('--n_envs',          default=DEFAULT_NUM_ENVS,        type=int,      help=f'Number of environments in vectorized training (default: {DEFAULT_NUM_ENVS})')
+    ARGS = parser.parse_args()
+
+    train(**vars(ARGS))
     print("[INFO] Done.")
+
     
