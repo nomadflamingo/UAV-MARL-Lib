@@ -153,14 +153,15 @@ cython_debug/
 ### Ignore RL models
 # Ignore 
 /junk/*
+# Ignore everything under results
 /results/*
+
+# But keep the ma directory and its subdirectories
 !/results/ma/
 !/results/ma/*/
-/results/ma/*/
-!/results/ma/*/final_model*.zip
-# Allow
-# !/results/ma/
-# /results/ma/*
-# !/results/ma/save*/
-# /results/ma/save*/*
-# !/results/ma/save*/final_model*.zip
+
+# Only track final_agent_*.zip files inside any subdir of results/ma/
+!/results/ma/*/final_agent_*_model.zip
+
+# Ignore everything else inside those subdirectories
+/results/ma/*/*
