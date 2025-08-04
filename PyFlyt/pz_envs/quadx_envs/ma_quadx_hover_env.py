@@ -214,6 +214,9 @@ class MAQuadXHoverEnv(MAQuadXBaseEnv):
             reward += 1.0
 
         return term, trunc, reward, info
+    
+    def render(self):
+        print("please render")
 
     def render_trajectory(self, save_path: str = None):
         """Plot 3D trajectories for ego and adversary, and current target."""

@@ -11,6 +11,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from wandb.integration.sb3 import WandbCallback
 
 from PyFlyt.pz_envs import CombatWaypointPursuitEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
 
 class SelfPlayEnv(gym.Env):
     """
@@ -103,32 +104,56 @@ if __name__ == "__main__":
     EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
     ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
 
-    model_ego = SAC.load(EGO_MODEL_PATH)
-    model_adv = SAC.load(ADV_MODEL_PATH)
+    # MODEL_PATHS = ['./junk/save-hover-0-08.02.2025_16.46/final_agent_0_model.zip',
+    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_1_model.zip',
+    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_2_model.zip',
+    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_3_model.zip']
+
+    # model_ego = SAC.load(EGO_MODEL_PATH)
+    # model_adv = SAC.load(ADV_MODEL_PATH)
+    # models = [SAC.load(path) for path in MODEL_PATHS]
+
+    save_dir = './results/ma/save-combat-0-07.31.2025_09.38'
+    model_filename_template = 'final_agent_{agent_num}_model.zip'
 
     # === Initialize environment with rendering enabled ===
     env = CombatWaypointPursuitEnv(render_mode="human")
+    # env = MAQuadXHoverEnv(render_mode="human")
     obs, _ = env.reset(seed=7)
 
+    ### Load Models for all agents
+    models = {}
+    for i, agent in enumerate(env.agents):
+        model_path = os.path.join(save_dir, model_filename_template.format(agent_num=i))
+        assert os.path.exists(model_path), f"Missing model for agent {i}: {model_path}"
+        models[agent] = SAC.load(model_path)
     # print(obs)
     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # === Main loop ===
     while True:
-        ego_obs = obs["uav_0"]
-        adv_obs = obs["uav_1"]
 
-        ego_action, _ = model_ego.predict(ego_obs, deterministic=True)
-        adv_action, _ = model_adv.predict(adv_obs, deterministic=True)
+        actions = {}
+        for agent in env.agents:
+            agent_obs = obs[agent]
+            actions[agent], _ = models[agent].predict(agent_obs, deterministic=True)
 
-        obs, rewards, dones, truncs, infos = env.step({
-            "uav_0": ego_action,
-            "uav_1": adv_action,
-        })
+        obs, rewards, dones, truncs, infos = env.step(actions)
+        
+        # ego_obs = obs["uav_0"]
+        # adv_obs = obs["uav_1"]
+
+        # ego_action, _ = model_ego.predict(ego_obs, deterministic=True)
+        # adv_action, _ = model_adv.predict(adv_obs, deterministic=True)
+
+        # obs, rewards, dones, truncs, infos = env.step({
+        #     "uav_0": ego_action,
+        #     "uav_1": adv_action,
+        # })
 
         # Render frame
         env.render()
-        time.sleep(1.0 / env.agent_hz)
+        time.sleep(1.0 / 40)
 
         # Exit if either agent is done
         if any(dones.values()) or any(truncs.values()):

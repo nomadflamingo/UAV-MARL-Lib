@@ -36,8 +36,8 @@ DEFAULT_FLIGHT_MODE = 0
 # DEFAULT_OUTPUT_FOLDER = 'results/ma'
 DEFAULT_OUTPUT_FOLDER = 'junk'
 DEFAULT_NUM_AGENTS = 4
-DEFAULT_TOTAL_TIMESTEPS = int(1e5)
-DEFAULT_UPDATE_INTERVAL = int(1_000)
+DEFAULT_TOTAL_TIMESTEPS = int(1e7)
+DEFAULT_UPDATE_INTERVAL = int(100_000)
 DEFAULT_NUM_ENVS = 8
 
 class RewardLoggingCallback(BaseCallback):
@@ -157,12 +157,12 @@ def train(env=DEFAULT_ENV,
                 eval_envs[agent_id],
                 best_model_save_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
                 log_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
-                eval_freq=10_000,
+                eval_freq=100_000,
                 deterministic=True,
                 render=False,
             ),
             CheckpointCallback(
-                save_freq=250_000 // n_envs,
+                save_freq=500_000 // n_envs,
                 save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
                 name_prefix=f"agent_{agent_id}"
             ),
