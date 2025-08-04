@@ -154,8 +154,9 @@ cython_debug/
 # Ignore 
 /junk/*
 /results/*
-!/results/ma
-!/results/ma/*
+!/results/ma/
+!/results/ma/*/
+/results/ma/*/
 !/results/ma/*/final_model*.zip
 # Allow
 # !/results/ma/
