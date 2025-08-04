@@ -152,11 +152,14 @@ cython_debug/
 
 ### Ignore RL models
 # Ignore 
-/results/*
 /junk/*
+/results/*
+!/results/ma
+!/results/ma/*
+!/results/ma/*/final_model*.zip
 # Allow
-!/results/ma/
-/results/ma/*
-!/results/ma/save*/
-/results/ma/save*/*
-!/results/ma/save*/final_model*.zip
+# !/results/ma/
+# /results/ma/*
+# !/results/ma/save*/
+# /results/ma/save*/*
+# !/results/ma/save*/final_model*.zip
