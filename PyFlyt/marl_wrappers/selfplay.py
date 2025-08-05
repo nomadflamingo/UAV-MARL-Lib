@@ -1,7 +1,20 @@
 import gymnasium as gym
 import numpy as np
+import copy
+import os
 from gymnasium import spaces
 from typing import Any, Literal
+
+# SB3
+from stable_baselines3 import SAC
+from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, CheckpointCallback
+
+# Envs
+from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
+from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 
 class SelfPlayEnv(gym.Env):
     """
@@ -94,7 +107,7 @@ class MASelfPlayEnv(gym.Env):
         super().__init__()
         self.ma_env = ma_env
         self.train_id = train_agent_id
-        self.opp_ids = [i for i in range(len(ma_env.agents)) if i != train_agent_id]
+        self.opp_ids = [i for i in range(ma_env.num_possible_agents) if i != train_agent_id]
         self.opp_policies = opp_policies  # dict of {agent_id: policy}
 
         # One reset to get observation shape
@@ -156,6 +169,208 @@ class MASelfPlayEnv(gym.Env):
     def render(self, *args, **kwargs):
         return self.ma_env.render(*args, **kwargs)
 
+class FictitiousPlayEnv:
+    """
+    Wraps a multi-agent PettingZoo env to train one agent against multiple opponents.
+    `train_agent_id` is the index of the agent being trained.
+    `opp_policies` is a dict mapping agent index to a fixed opponent policy.
+    """
+    def __init__(self, ma_env, agent_ids, save_dir, sac_kwargs):
+        # super().__init__()
+        self.ma_env = ma_env(render_mode=None, flight_mode=0)
+        self.agent_ids = agent_ids
+        self.save_dir = save_dir
+        self.sac_kwargs = sac_kwargs
+        # self.opp_ids = [i for i in range(len(ma_env.agents)) if i != train_agent_id]
+        # self.opp_policies = opp_policies  # dict of {agent_id: policy}
+        self.models = {i: [] for i in agent_ids} # List of past BRs
+        self.current_br = {}                     # Best response agent (current training model)
+        self.policy_dist = {i: [1.0] for i in agent_ids}
+
+        # One reset to get observation shape
+        # obs_dict, _ = self.ma_env.reset()
+        # train_name = self.ma_env.agents[self.train_id]
+        # sample_obs = obs_dict[train_name]
+
+        # # SB3 observation space
+        # if ma_env.metadata["name"] == 'combat_pursuit':
+        #     self.observation_space = spaces.Dict({
+        #         "attitude": spaces.Box(low=-np.inf, high=np.inf, shape=sample_obs["attitude"].shape, dtype=np.float32),
+        #         "target_deltas": spaces.Box(low=-np.inf, high=np.inf, shape=sample_obs["target_deltas"].shape, dtype=np.float32),
+        #     })
+        # else:
+        #     self.observation_space = ma_env.observation_space(train_name)
+
+        # self.action_space = ma_env.action_space(train_name)
+
+    def make_env(self, ma_env, strat, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
+        def _init():
+            if ma_env == True:
+                ma_env = MAQuadXHoverEnv(render_mode=None, flight_mode=flight_mode)
+            else:
+                ma_env = MAQuadXHoverEnv(render_mode=None, flight_mode=flight_mode)
+            ma_env.reset()
+            
+            return ma_env
+        return _init
+
+    def reset(self, *, seed=None, options=None):
+        obs_dict, infos = self.ma_env.reset(seed=seed, options=options)
+        self._last_obs = obs_dict
+        train_name = self.ma_env.agents[self.train_id]
+        return obs_dict[train_name], infos.get(train_name, {})
+    
+    def populate_buffer(self, seed=42, gamma=0.9, buffer_size=10000):
+        """Populate replay buffer using the parallel API with vectorized envs."""
+        steps = 0
+        observations = self.env.reset(seed=seed)  # set seed once if needed
+
+        while steps <= buffer_size:
+            actions = {}
+            for agent_ in self.env.agents:
+                # Vectorized action sampling across envs for each agent
+                for agent, obs in observations.items():
+                    obs = pad_obs(observations[agent])  # shape: (n_envs, obs_dim)
+                    actions[agent] = self.env.get_random_action(agent_)
+
+            # Step the environment
+            new_obs, rewards, terminations, truncations, infos = self.env.step(actions)
+
+            # Compute done mask (shared across all agents per env)
+            done = terminations | truncations  # shape: (n_envs,)
+            mask = (~done).float() * gamma     # shape: (n_envs,)
+
+            for agent in actions:
+                obs      = pad_obs(observations[agent]).view(len(done), -1)   # (n_envs, obs_dim)
+                next_obs = pad_obs(new_obs[agent]).view(len(done), -1)
+                act      = actions[agent]   # (n_envs, act_dim) or (n_envs,)
+                rew      = rewards[agent]   # (n_envs,)
+
+                if agent in ('agent_0', 'agent_1'):
+                    self.agent1.append_memory_batch(
+                        obs.detach().cpu().numpy(),
+                        act.detach().cpu().numpy(),
+                        rew.detach().cpu().numpy(),
+                        next_obs.detach().cpu().numpy(),
+                        mask.detach().cpu().numpy()
+                    )
+                elif agent in ('adversary_0', 'adversary_1'):
+                    self.agent2.append_memory_batch(
+                        obs.detach().cpu().numpy(),
+                        act.detach().cpu().numpy(),
+                        rew.detach().cpu().numpy(),
+                        next_obs.detach().cpu().numpy(),
+                        mask.detach().cpu().numpy()
+                    )
+
+            steps += len(done)
+            if steps >= buffer_size:
+                print("Buffer populated.")
+                return
+
+            observations = new_obs
+
+    def update_policy_distribution(self, agent_id):
+        policy_avg = self.models[agent_id]
+        # print(f"[INFO] agent{agent_id} models: ", self.models[agent_id])
+        k = len(policy_avg) # current timestep
+        if k <= 1: 
+            avg_policy_weight = 1 
+            normalized_policy_dist = [1.0]
+        else: 
+            avg_policy_weight = (k-1) / (k+1)
+            new_policy_weight = 2 / (k+1)
+
+            scaled_latest_prob = (1 / avg_policy_weight) * new_policy_weight
+            new_policy_dist = self.policy_dist[agent_id] + [scaled_latest_prob]
+
+            total_sum = sum(new_policy_dist)
+            normalized_policy_dist = [p / total_sum for p in new_policy_dist]
+            print(f"[INFO] agent{agent_id} policy dist:", normalized_policy_dist)
+
+        self.policy_dist[agent_id] = normalized_policy_dist
+
+        if k != len(normalized_policy_dist):
+            print(f"[WARNING] Descrepancy between number of models ({k}) and probability distribution ({len(normalized_policy_dist)}).")
+    
+    def sample_avg_policy(self, agent_id):
+        class AvgPolicy:
+            def __init__(self, models, probs, env):
+                self.models = models
+                self.probs = probs
+                self.env = env
+                print(f"[INFO] Probs {self.probs}")
+            def predict(self, obs, deterministic=True):
+                if len(self.models) == 0:
+                    print(f"[INFO] Agent {agent_id} does not have any models yet, defaulting to RandomPolicy")
+                    model = RandomPolicy(self.env.action_space(agent_id))
+                else:
+                    model = np.random.choice(self.models, p=self.probs)
+                return model.predict(obs, deterministic)
+        return AvgPolicy(self.models[agent_id], self.policy_dist[agent_id], self.ma_env)
+    
+    def train_agent(self, agent_id, total_timesteps, callbacks):
+        # Create training env using current avg opponent
+        opp_ids = [i for i in range(self.ma_env.num_possible_agents) if i != agent_id]
+        print(f"[INFO] Starting policies")
+        opp_policies = {
+                opp_id: self.sample_avg_policy(opp_id)
+                for opp_id in opp_ids
+            }
+
+        train_env = MASelfPlayEnv(self.ma_env, agent_id, opp_policies)
+        print(f'[INFO] env = {self.ma_env}')
+        # Init SAC
+        model = SAC(env=train_env, **self.sac_kwargs)
+
+        # Train
+        model.learn(total_timesteps=total_timesteps, callback=callbacks)
+        self.current_br[agent_id] = model
+        policy_copy = copy.deepcopy(model.policy)
+        self.models[agent_id].append(policy_copy)
+
+        self.update_policy_distribution(agent_id)
+
+        # Save
+        model.save(os.path.join(self.save_dir, f"agent_{agent_id}_br_{len(self.models[agent_id]):04d}"))
+
+
+    def step(self, action):
+        actions = {}
+
+        # Add training agent's action
+        train_name = self.ma_env.agents[self.train_id]
+        actions[train_name] = action
+
+        # Add each opponent's action
+        for opp_id in self.opp_ids:
+            opp_name = self.ma_env.agents[opp_id]
+            last_obs = self._last_obs.get(opp_name, None)
+            if last_obs is None:
+                last_obs = self.ma_env.observation_space(opp_name).sample()
+            opp_policy = self.opp_policies.get(opp_id)
+            if opp_policy is None:
+                opp_action = self.ma_env.action_space(opp_name).sample()
+            else:
+                opp_action, _ = opp_policy.predict(last_obs, deterministic=True)
+            actions[opp_name] = opp_action
+
+        # Step environment
+        obs_dict, rewards, terms, truncs, infos = self.ma_env.step(actions)
+        self._last_obs = obs_dict
+
+        obs = obs_dict[train_name]
+        rew = rewards[train_name]
+        terminated = any(terms.values())
+        truncated = any(truncs.values())
+        info = infos.get(train_name, {})
+
+        if terminated or truncated:
+            obs, info = self.reset()
+        return obs, rew, terminated, truncated, info
+
+    def render(self, *args, **kwargs):
+        return self.ma_env.render(*args, **kwargs)
 
 class SelfPlayEnvWings(gym.Env):
     """
@@ -225,3 +440,12 @@ class SelfPlayEnvWings(gym.Env):
 
     def render(self, *args, **kwargs):
         return self.ma_env.render(*args, **kwargs)
+    
+class RandomPolicy:
+    """A dummy policy that returns random actions from a given action_space."""
+    def __init__(self, action_space):
+        self.action_space = action_space
+
+    def predict(self, obs, deterministic=True):
+        # SB3 expects a tuple (action, state)
+        return self.action_space.sample(), None
