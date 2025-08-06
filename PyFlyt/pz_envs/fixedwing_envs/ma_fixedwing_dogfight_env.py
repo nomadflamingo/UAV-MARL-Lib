@@ -49,8 +49,8 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         spawn_min_height: float = 20.0,
         spawn_max_height: float = 50.0,
         damage_per_hit: float = 0.003,
-        lethal_distance: float = 20.0,
-        lethal_angle_radians: float = 0.07,
+        lethal_distance: float = 25.0,
+        lethal_angle_radians: float = 0.2, #0.07,
         assisted_flight: bool = True,
         aggressiveness: float = 0.5,
         cooperativeness: float = 0.5,
@@ -95,6 +95,8 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
             assisted_flight=assisted_flight,
             render_mode=render_mode,
         )
+
+        print("HELLLOOOOO")
 
         # some environment constants
         self.team_size = team_size
@@ -188,12 +190,13 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
 
         """
         # seed the RNG
+        print("Seed", seed)
         np_random = np.random.RandomState(seed=seed)
 
         # start out pointing in outward directions equally spaced
         start_radian = np.pi / self.team_size * np.arange(
             self.team_size * 2
-        ) + np.random.uniform(0.0, 2 * np.pi)
+        ) + np_random.uniform(0.0, 2 * np.pi)
         start_radius = np_random.uniform(
             low=self.spawn_min_radius,
             high=self.spawn_max_radius,
@@ -216,6 +219,8 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         start_orn[:, 2] = (
             start_radian + np_random.random(self.num_possible_agents) * np.pi / 8.0
         )
+
+        print("START POS: ", start_pos)
 
         return start_pos, start_orn
 
@@ -250,7 +255,7 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         self.inactive = np.zeros(self.num_possible_agents, dtype=bool)
 
         # attitudes and health of all drones
-        self.healths = np.ones(self.num_possible_agents, dtype=np.float32)
+        self.healths = 0.28 * np.ones(self.num_possible_agents, dtype=np.float32)
         self.attitudes = np.zeros((self.num_possible_agents, 4, 3), dtype=np.float32)
         self.other_attitudes = np.zeros(
             (self.num_possible_agents, self.num_possible_agents, 4, 3), dtype=np.float32
@@ -800,6 +805,12 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
             ]:
 
         """
+        # Disadvantage UAV_1
+        # print("Actions:", actions)
+        actions["uav_0"][0:3] = 0.8*actions["uav_1"][0:3]
+        # actions["uav_1"][3] = 0.9*actions["uav_1"][3]
+        # print("Actions:", actions)
+        # exit()
         returns = super().step(actions=actions)
 
         if self.render_mode:

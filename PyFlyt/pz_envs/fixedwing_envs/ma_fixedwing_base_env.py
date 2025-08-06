@@ -213,10 +213,10 @@ class MAFixedwingBaseEnv(ParallelEnv):
 
         # reset the camera position to a sane place
         self.aviary.resetDebugVisualizerCamera(
-            cameraDistance=50,
+            cameraDistance=58,
             cameraYaw=30,
-            cameraPitch=-30,
-            cameraTargetPosition=[0, 0, 1],
+            cameraPitch=15,
+            cameraTargetPosition=[0, 0, 45],
         )
 
     def end_reset(
