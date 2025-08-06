@@ -18,7 +18,7 @@ from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 # pz
 from pettingzoo.test import parallel_api_test
 # SP
-from PyFlyt.marl_wrappers.selfplay import SelfPlayEnv, MASelfPlayEnv
+from PyFlyt.marl_wrappers.selfplay import SelfPlayEnv, MASelfPlayEnv, FictitiousPlayEnv
 
 
 # Global Defaults
@@ -33,11 +33,11 @@ DEFAULT_ENV = 'hover'
 DEFAULT_RETRAIN = False
 DEFAULT_TRAINED_FOLDER = 'name'
 DEFAULT_FLIGHT_MODE = 0
-DEFAULT_OUTPUT_FOLDER = 'results/ma'
-# DEFAULT_OUTPUT_FOLDER = 'junk'
+# DEFAULT_OUTPUT_FOLDER = 'results/ma'
+DEFAULT_OUTPUT_FOLDER = 'junk'
 DEFAULT_NUM_AGENTS = 4
-DEFAULT_TOTAL_TIMESTEPS = int(1e3)
-DEFAULT_UPDATE_INTERVAL = int(500)
+DEFAULT_TOTAL_TIMESTEPS = int(1e2)
+DEFAULT_UPDATE_INTERVAL = int(20)
 DEFAULT_NUM_ENVS = 8
 
 class RewardLoggingCallback(BaseCallback):
@@ -61,17 +61,21 @@ class RandomPolicy:
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
     
-def make_env(ma_env, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
+def make_env(ma_env, strat, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
     def _init():
         # ma_env = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
         ma_env.reset()
-        # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
-        opp_policies = {
-            i: RandomPolicy(ma_env.action_space(i))
-            for i in range(ma_env.num_possible_agents) if i != train_agent_id
-        }
-        env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
-        env.reset(seed=seed + train_agent_id)
+        if strat == 'fp':
+            env = FictitiousPlayEnv(ma_env)
+        elif strat == 'do':
+
+            # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
+            opp_policies = {
+                i: RandomPolicy(ma_env.action_space(i))
+                for i in range(ma_env.num_possible_agents) if i != train_agent_id
+            }
+            env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
+            env.reset(seed=seed + train_agent_id)
         return env
     return _init
 
@@ -85,7 +89,8 @@ def train(env=DEFAULT_ENV,
           total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
           update_interval=DEFAULT_UPDATE_INTERVAL,
           n_envs=DEFAULT_NUM_ENVS,
-          strategy="double_oracle",):
+          strategy="fp",
+          policy_type="SAC",):
     """
     Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
     """
@@ -115,6 +120,72 @@ def train(env=DEFAULT_ENV,
     save_dir = os.path.join(output_folder, 'save-'+env+'-'+str(flight_mode)+'-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
+
+
+    #################################
+    ###   BREAK FOR FSP TESTING   ###
+    #################################
+    # Initialization FSPTrainer.init
+    sac_kwargs=dict(
+            policy=policy,
+            verbose=1,
+            tensorboard_log=os.path.join(save_dir, "fsp_logs"),)
+    FspTrainer = FictitiousPlayEnv(env_class, agent_ids, save_dir, sac_kwargs)
+    # main
+    # print("[INFO] Populating fictitious play policy buffer...")
+    # FspTrainer.populate_buffer()
+    agent_id = 0
+    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    agent_id = 1
+    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    agent_id = 0
+    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    agent_id = 1
+    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    agent_id = 0
+    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # for it in range(total_timesteps // update_interval):
+    #     for agent_id in agent_ids:
+    #         print(f"[FSP Iter {it}] ▶ Training BR for Agent {agent_id}")
+            
+
+    print("\n[INFO] Done.\n")
+    exit()
+
+    #################################
+    ###       TRAINING LOOP       ###
+    #################################
+    n_iters = total_timesteps // update_interval
+    for it in range(1, n_iters + 1):
+        for agent_id in agent_ids:
+            print(f"[Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
+            # Training
+            play_env.train_agent_against_average(agent_id)
+
+            # Exploitability
+            exp_opp, exp_ego, exploitability, sum_exploitability = play_env.compute_exploitability()
+            play_env.logger.log({
+                "fsp_iteration": n_iters + 1,
+                "exploitability/total": exploitability,
+                "exploitability/mean": sum_exploitability,
+                "exploitability/opp": exp_opp,
+                "exploitability/ego": exp_ego,
+            })
+
+            print(f"Exploitability after FSP Iteration {n_iters + 1}: {exploitability:.4f}")
+            print(f"Mean Exploitability: {sum_exploitability:.4f}")
+
+            # Plot traj
+            # for env in vec_envs[agent_id].envs:
+            #     env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
+
+    ### SAVE FINAL MODELS ###
+    play_env.evalutate(it)
+    for agent_id in agent_ids:
+        models[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
+    print(f"[INFO] Training complete. Models saved in {save_dir}")
+
+    return
 
     #################################
     ###    LOAD/INITIATE MODELS   ###
