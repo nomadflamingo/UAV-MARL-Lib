@@ -220,75 +220,81 @@ class FictitiousPlayEnv:
         train_name = self.ma_env.agents[self.train_id]
         return obs_dict[train_name], infos.get(train_name, {})
     
-    def populate_buffer(self, seed=42, gamma=0.9, buffer_size=10000):
-        """Populate replay buffer using the parallel API with vectorized envs."""
-        steps = 0
-        observations = self.env.reset(seed=seed)  # set seed once if needed
+    # def populate_buffer(self, seed=42, gamma=0.9, buffer_size=10000):
+    #     """Populate replay buffer using the parallel API with vectorized envs."""
+    #     steps = 0
+    #     observations = self.env.reset(seed=seed)  # set seed once if needed
 
-        while steps <= buffer_size:
-            actions = {}
-            for agent_ in self.env.agents:
-                # Vectorized action sampling across envs for each agent
-                for agent, obs in observations.items():
-                    obs = pad_obs(observations[agent])  # shape: (n_envs, obs_dim)
-                    actions[agent] = self.env.get_random_action(agent_)
+    #     while steps <= buffer_size:
+    #         actions = {}
+    #         for agent_ in self.env.agents:
+    #             # Vectorized action sampling across envs for each agent
+    #             for agent, obs in observations.items():
+    #                 obs = pad_obs(observations[agent])  # shape: (n_envs, obs_dim)
+    #                 actions[agent] = self.env.get_random_action(agent_)
 
-            # Step the environment
-            new_obs, rewards, terminations, truncations, infos = self.env.step(actions)
+    #         # Step the environment
+    #         new_obs, rewards, terminations, truncations, infos = self.env.step(actions)
 
-            # Compute done mask (shared across all agents per env)
-            done = terminations | truncations  # shape: (n_envs,)
-            mask = (~done).float() * gamma     # shape: (n_envs,)
+    #         # Compute done mask (shared across all agents per env)
+    #         done = terminations | truncations  # shape: (n_envs,)
+    #         mask = (~done).float() * gamma     # shape: (n_envs,)
 
-            for agent in actions:
-                obs      = pad_obs(observations[agent]).view(len(done), -1)   # (n_envs, obs_dim)
-                next_obs = pad_obs(new_obs[agent]).view(len(done), -1)
-                act      = actions[agent]   # (n_envs, act_dim) or (n_envs,)
-                rew      = rewards[agent]   # (n_envs,)
+    #         for agent in actions:
+    #             obs      = pad_obs(observations[agent]).view(len(done), -1)   # (n_envs, obs_dim)
+    #             next_obs = pad_obs(new_obs[agent]).view(len(done), -1)
+    #             act      = actions[agent]   # (n_envs, act_dim) or (n_envs,)
+    #             rew      = rewards[agent]   # (n_envs,)
 
-                if agent in ('agent_0', 'agent_1'):
-                    self.agent1.append_memory_batch(
-                        obs.detach().cpu().numpy(),
-                        act.detach().cpu().numpy(),
-                        rew.detach().cpu().numpy(),
-                        next_obs.detach().cpu().numpy(),
-                        mask.detach().cpu().numpy()
-                    )
-                elif agent in ('adversary_0', 'adversary_1'):
-                    self.agent2.append_memory_batch(
-                        obs.detach().cpu().numpy(),
-                        act.detach().cpu().numpy(),
-                        rew.detach().cpu().numpy(),
-                        next_obs.detach().cpu().numpy(),
-                        mask.detach().cpu().numpy()
-                    )
+    #             if agent in ('agent_0', 'agent_1'):
+    #                 self.agent1.append_memory_batch(
+    #                     obs.detach().cpu().numpy(),
+    #                     act.detach().cpu().numpy(),
+    #                     rew.detach().cpu().numpy(),
+    #                     next_obs.detach().cpu().numpy(),
+    #                     mask.detach().cpu().numpy()
+    #                 )
+    #             elif agent in ('adversary_0', 'adversary_1'):
+    #                 self.agent2.append_memory_batch(
+    #                     obs.detach().cpu().numpy(),
+    #                     act.detach().cpu().numpy(),
+    #                     rew.detach().cpu().numpy(),
+    #                     next_obs.detach().cpu().numpy(),
+    #                     mask.detach().cpu().numpy()
+    #                 )
 
-            steps += len(done)
-            if steps >= buffer_size:
-                print("Buffer populated.")
-                return
+    #         steps += len(done)
+    #         if steps >= buffer_size:
+    #             print("Buffer populated.")
+    #             return
 
-            observations = new_obs
+    #         observations = new_obs
 
-    def update_policy_distribution(self, agent_id):
+    def update_policy_distribution(self, agent_id, strat):
         policy_avg = self.models[agent_id]
         # print(f"[INFO] agent{agent_id} models: ", self.models[agent_id])
         k = len(policy_avg) # current timestep
-        if k <= 1: 
-            avg_policy_weight = 1 
-            normalized_policy_dist = [1.0]
-        else: 
-            avg_policy_weight = (k-1) / (k+1)
-            new_policy_weight = 2 / (k+1)
 
-            scaled_latest_prob = (1 / avg_policy_weight) * new_policy_weight
-            new_policy_dist = self.policy_dist[agent_id] + [scaled_latest_prob]
+        if strat == 'vp':
+            self.policy_dist[agent_id] = [0.0] * (k-1) + [1.0]
+        if strat == 'fp':
+            if k <= 1: 
+                normalized_policy_dist = [1.0]
+            else: 
+                avg_policy_weight = (k-1) / (k+1)
+                new_policy_weight = 2 / (k+1)
 
-            total_sum = sum(new_policy_dist)
-            normalized_policy_dist = [p / total_sum for p in new_policy_dist]
-            print(f"[INFO] agent{agent_id} policy dist:", normalized_policy_dist)
+                scaled_latest_prob = (1 / avg_policy_weight) * new_policy_weight
+                new_policy_dist = self.policy_dist[agent_id] + [scaled_latest_prob]
 
-        self.policy_dist[agent_id] = normalized_policy_dist
+                total_sum = sum(new_policy_dist)
+                normalized_policy_dist = [p / total_sum for p in new_policy_dist]
+
+            self.policy_dist[agent_id] = normalized_policy_dist
+        elif strat == 'dup':
+            n = min(k, 10)
+            normalized_policy_dist = [0.0] * (k - n) + [1.0 / n] * n
+            self.policy_dist[agent_id] = normalized_policy_dist
 
         if k != len(normalized_policy_dist):
             print(f"[WARNING] Descrepancy between number of models ({k}) and probability distribution ({len(normalized_policy_dist)}).")
@@ -319,9 +325,15 @@ class FictitiousPlayEnv:
             }
 
         train_env = MASelfPlayEnv(self.ma_env, agent_id, opp_policies)
-        print(f'[INFO] env = {self.ma_env}')
-        # Init SAC
-        model = SAC(env=train_env, **self.sac_kwargs)
+        
+        if self.models[agent_id]:
+            print(f"[INFO] Continuing training for agent {agent_id}")
+            # Restore previous SAC model (we assume self.current_br stores it)
+            model = self.current_br[agent_id]
+            model.set_env(train_env)  # Update environment (if it changed)
+        else:
+            print(f"[INFO] Initializing new model for agent {agent_id}")
+            model = SAC(env=train_env, **self.sac_kwargs)
 
         # Train
         model.learn(total_timesteps=total_timesteps, callback=callbacks)

@@ -2,95 +2,147 @@ import os
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from collections import Counter
 import wandb
 import time
+import re
+import matplotlib.pyplot as plt
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 from stable_baselines3.common.callbacks import CheckpointCallback
 from wandb.integration.sb3 import WandbCallback
 
-from PyFlyt.pz_envs import CombatWaypointPursuitEnv
+# Envs
+from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
+from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 
-class SelfPlayEnv(gym.Env):
+# Global Defaults
+ENV_REGISTRY = {
+    "dogfight": MAFixedwingDogfightEnvV2,
+    # "dogfight_QX": MAQuadXDogfightEnv,       # Implementation not finished
+    "combat": CombatWaypointPursuitEnv,      # Results Questionable
+    "hover": MAQuadXHoverEnv,
+}
+
+def extract_env_type(path: str) -> str:
+    """Extract env_type from a results path and validate against ENV_REGISTRY."""
+    match = re.search(r'save-([^-]+)-', path)
+    if not match:
+        raise ValueError(f"Could not extract environment type from path: {path}")
+    
+    env_type = match.group(1)
+    
+    if env_type not in ENV_REGISTRY:
+        raise KeyError(
+            f"Environment type '{env_type}' not found in ENV_REGISTRY. "
+            f"Available: {list(ENV_REGISTRY.keys())}"
+        )
+    
+    return env_type
+
+def evaluate_competitive_game(env, models, num_episodes=100, seed=None):
     """
-    Wraps CombatWaypointPursuitEnv for one agent.
-    The training agent takes its action from `train_model.predict()`,
-    and the opponent from `opp_policy.predict()`.
+    Evaluate a multi-agent competitive game environment (dogfight, combat, etc.).
+    
+    Args:
+        env: Environment instance.
+        num_episodes: Number of episodes to evaluate.
+        seed: Optional seed.
+
+    Returns:
+        dict: {'team_0_wins': int, 'team_1_wins': int, 'ties': int}
     """
-    def __init__(self, ma_env: CombatWaypointPursuitEnv, train_agent_id: int, opp_policy):
-        super().__init__()
-        self.ma_env     = ma_env
-        self.train_id   = train_agent_id
-        self.opp_id     = 1 - train_agent_id
-        self.opp_policy = opp_policy
+    results = {
+        "team_0_wins": 0,
+        "team_1_wins": 0,
+        "ties": 0
+    }
 
-        # One reset to infer observation shape
-        obs_dict, _ = self.ma_env.reset()
-        name        = self.ma_env.agents[self.train_id]
-        sample_obs  = obs_dict[name]
-
-        # Build SB3-compatible spaces
-        self.observation_space = spaces.Dict({
-            "attitude":      spaces.Box(
-                                  low=-np.inf,
-                                  high=np.inf,
-                                  shape=sample_obs["attitude"].shape,
-                                  dtype=np.float32),
-            "target_deltas": spaces.Box(
-                                  low=-np.inf,
-                                  high=np.inf,
-                                  shape=sample_obs["target_deltas"].shape,
-                                  dtype=np.float32),
-        })
-        self.action_space = ma_env.action_space(name)
-
-    def reset(self, *, seed=None, options=None):
-        if seed is not None or options is not None:
-            obs_dict, infos = self.ma_env.reset(seed=seed, options=options)
+    for ep in range(num_episodes):
+        print(f"[INFO] Evaluating Episode {ep}...")
+        if seed is not None:
+            obs, _ = env.reset(seed=seed + ep)
         else:
-            obs_dict, infos = self.ma_env.reset()
-        name = self.ma_env.agents[self.train_id]
-        return obs_dict[name], infos.get(name, {})
+            obs, _ = env.reset()
 
-    def step(self, action):
-        ag_train = self.ma_env.agents[self.train_id]
-        ag_opp   = self.ma_env.agents[self.opp_id]
+        dones = {agent: False for agent in env.agents}
+        actions = {}
 
-        # opponent observation
-        opp_obs = getattr(self, "_last_obs", {}).get(ag_opp, None)
-        if opp_obs is None:
-            # fallback to sampling a random action first
-            curr_obs, rewards, terms, truncs, infos = self.ma_env.step({
-                ag_train: action,
-                ag_opp:   self.action_space.sample(),
-            })
-            opp_obs = curr_obs[ag_opp]
-        opp_action, _ = self.opp_policy.predict(opp_obs, deterministic=True)
+        while not all(dones.values()):
+            for agent in env.agents:
+                agent_obs = obs[agent]
+                actions[agent], _ = models[agent].predict(agent_obs, deterministic=True)
+            obs, rewards, terminations, truncations, infos = env.step(actions)
+            dones = {agent: terminations[agent] or truncations[agent] for agent in env.agents}
 
-        # step multi-agent env
-        obs_dict, rewards, terms, truncs, infos = self.ma_env.step({
-            ag_train: action,
-            ag_opp:   opp_action,
-        })
-        self._last_obs = obs_dict
+        # Check info dicts for team wins
+        team_win_flags = [infos[ag].get("team_win", False) for ag in infos]
+        if any(team_win_flags):
+            # Determine which team won
+            print(f"[INFO] flag:", env.unwrapped.team_flag)
+            # if env.unwrapped.team_flag[0]:  # uav_0's team is True
+            # Map win flags to team indexes
+            team_idx = [int(env.unwrapped.team_flag[env.unwrapped.agent_name_mapping[ag]]) for ag in infos]
+            winning_teams = {team_idx[i] for i, win in enumerate(team_win_flags) if win}
+            if len(winning_teams) == 1:
+                if 0 in winning_teams:
+                    results["team_0_wins"] += 1
+                else:
+                    results["team_1_wins"] += 1
+            else:
+                    results["ties"] += 1
+            
+            # raise ValueError("Unexpected team_flag format")
+        else:
+            results["ties"] += 1
 
-        obs  = obs_dict[ag_train]
-        rew  = rewards[ag_train]
-        # done = bool(terms[ag_train] or truncs[ag_train])
-        terminated = bool(terms[ag_train]   or terms[ag_opp])
-        truncated  = bool(truncs[ag_train]  or truncs[ag_opp])
-        info = infos.get(ag_train, {})
+        # env.close()
+    env.close()
+    return dict(results)
 
-        if terminated or truncated:
-            obs, info = self.reset()
-        return obs, rew, terminated, truncated, info
+def plot_win_rates(strategies, eval_results):
 
-    def render(self, *args, **kwargs):
-        return self.ma_env.render(*args, **kwargs)
+    # Extract Results
+    team_0_wins = [r['team_0_wins'] for r in eval_results]
+    ties        = [r['ties'] for r in eval_results]
+    team_1_wins = [r['team_1_wins'] for r in eval_results]
+
+    iters = sum(eval_results[0].values())
+
+    x = np.arange(len(strategies))
+    bar_width = 0.6
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    p1 = ax.bar(x, team_0_wins, bar_width, label="Team 0 Wins", color="skyblue")
+    p2 = ax.bar(x, ties, bar_width, bottom=team_0_wins, label="Ties", color="lightgray")
+    p3 = ax.bar(x, team_1_wins, bar_width,
+                bottom=np.array(team_0_wins) + np.array(ties),
+                label="Team 1 Wins", color="salmon")
+
+    # Labels and formatting
+    ax.set_xlabel('Strategy')
+    ax.set_ylabel('Number of Games')
+    ax.set_title(f'Game Outcomes per Strategy ({iters} games)')
+    ax.set_xticks(x)
+    ax.set_xticklabels(strategies)
+    ax.set_ylim(0, iters)
+    ax.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
+
+    print("[INFO] Beginning Evaluation...")
+
+    strategies = ['strategy1']
+
+    # === Loading ===
+    # TODO Fix File path loading format
 
     # EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip'
     # ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip'
@@ -113,46 +165,50 @@ if __name__ == "__main__":
     # model_adv = SAC.load(ADV_MODEL_PATH)
     # models = [SAC.load(path) for path in MODEL_PATHS]
 
-    save_dir = './results/ma/save-combat-0-07.31.2025_09.38'
+    save_dirs =[]
+
+    save_dir = './results/ma/save-dogfight-a-07.23.2025_22.28'
+    # save_dir = './results/ma/save-combat-0-07.31.2025_09.38'
     model_filename_template = 'final_agent_{agent_num}_model.zip'
+    # === End of Loading ===
 
     # === Initialize environment with rendering enabled ===
-    env = CombatWaypointPursuitEnv(render_mode="human")
-    # env = MAQuadXHoverEnv(render_mode="human")
-    obs, _ = env.reset(seed=7)
+    # Initiate test environment 
+    env_type = extract_env_type(save_dir)
+    env_class = ENV_REGISTRY[env_type]
+    test_env = env_class(render_mode="human", max_duration_seconds=15.0)
+    test_env_no_gui = env_class(render_mode=None, max_duration_seconds=60.0)
+    
+    test_env_no_gui.reset()
 
     ### Load Models for all agents
     models = {}
-    for i, agent in enumerate(env.agents):
+    for i, agent in enumerate(test_env_no_gui.agents):
         model_path = os.path.join(save_dir, model_filename_template.format(agent_num=i))
         assert os.path.exists(model_path), f"Missing model for agent {i}: {model_path}"
         models[agent] = SAC.load(model_path)
-    # print(obs)
-    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-    # === Main loop ===
+    ### Statistical Evaluation
+    eval_results = []
+    eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=100))
+    print(f"[INFO] Consider your results, evaluated \n", eval_results)
+
+    plot_win_rates(strategies, eval_results)
+    
+    exit()
+
+    ### Visual Evaluation
+    obs, _ = test_env.reset(seed=7)
     while True:
 
         actions = {}
-        for agent in env.agents:
+        for agent in test_env.agents:
             agent_obs = obs[agent]
             actions[agent], _ = models[agent].predict(agent_obs, deterministic=True)
 
-        obs, rewards, dones, truncs, infos = env.step(actions)
-        
-        # ego_obs = obs["uav_0"]
-        # adv_obs = obs["uav_1"]
-
-        # ego_action, _ = model_ego.predict(ego_obs, deterministic=True)
-        # adv_action, _ = model_adv.predict(adv_obs, deterministic=True)
-
-        # obs, rewards, dones, truncs, infos = env.step({
-        #     "uav_0": ego_action,
-        #     "uav_1": adv_action,
-        # })
+        obs, rewards, dones, truncs, infos = test_env.step(actions)
 
         # Render frame
-        env.render()
         time.sleep(1.0 / 40)
 
         # Exit if either agent is done

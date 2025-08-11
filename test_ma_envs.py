@@ -61,23 +61,23 @@ class RandomPolicy:
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
     
-def make_env(ma_env, strat, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
-    def _init():
-        # ma_env = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
-        ma_env.reset()
-        if strat == 'fp':
-            env = FictitiousPlayEnv(ma_env)
-        elif strat == 'do':
+# def make_env(ma_env, strat, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
+#     def _init():
+#         # ma_env = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
+#         ma_env.reset()
+#         if strat == 'fp':
+#             env = FictitiousPlayEnv(ma_env)
+#         else: #strat == 'do':
 
-            # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
-            opp_policies = {
-                i: RandomPolicy(ma_env.action_space(i))
-                for i in range(ma_env.num_possible_agents) if i != train_agent_id
-            }
-            env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
-            env.reset(seed=seed + train_agent_id)
-        return env
-    return _init
+#             # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
+#             opp_policies = {
+#                 i: RandomPolicy(ma_env.action_space(i))
+#                 for i in range(ma_env.num_possible_agents) if i != train_agent_id
+#             }
+#             env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
+#             env.reset(seed=seed + train_agent_id)
+#         return env
+#     return _init
 
 ##### TRAINING FUNCTION #################################################################################
 def train(env=DEFAULT_ENV, 
@@ -130,27 +130,78 @@ def train(env=DEFAULT_ENV,
             policy=policy,
             verbose=1,
             tensorboard_log=os.path.join(save_dir, "fsp_logs"),)
-    FspTrainer = FictitiousPlayEnv(env_class, agent_ids, save_dir, sac_kwargs)
+    Trainer = FictitiousPlayEnv(env_class, agent_ids, save_dir, sac_kwargs)
     # main
     # print("[INFO] Populating fictitious play policy buffer...")
     # FspTrainer.populate_buffer()
-    agent_id = 0
-    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    agent_id = 1
-    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    agent_id = 0
-    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    agent_id = 1
-    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    agent_id = 0
-    FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # agent_id = 0
+    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # agent_id = 1
+    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # agent_id = 0
+    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # agent_id = 1
+    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+    # agent_id = 0
+    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
     # for it in range(total_timesteps // update_interval):
     #     for agent_id in agent_ids:
     #         print(f"[FSP Iter {it}] ▶ Training BR for Agent {agent_id}")
-            
 
-    print("\n[INFO] Done.\n")
-    exit()
+
+    # #################################
+    # ###    LOAD/INITIATE MODELS   ###
+    # #################################
+    # vec_envs = {}
+    # eval_envs = {}
+    # models = {}
+    # for agent_id in agent_ids:
+    #     # Create vectorized training environments
+    #     vec_envs[agent_id] = VecMonitor(
+    #         DummyVecEnv([make_env(ma_env, strategy, agent_id, seed=42 + agent_id, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
+    #     )
+    #     # Check env access
+    #     print(f'[INFO] Agent {agent_id} action space:', vec_envs[agent_id].action_space)
+    #     print(f'[INFO] Agent {agent_id} observation space:', vec_envs[agent_id].observation_space)
+
+    #     # Create evaluation environments
+    #     eval_envs[agent_id] = VecMonitor(
+    #         DummyVecEnv([
+    #             make_env(ma_env, strategy, agent_id, seed=1000 + agent_id, n_envs=1, flight_mode=flight_mode)
+    #         ])
+    #     )
+
+    #     # Train model
+    #     models[agent_id] = SAC(
+    #         policy=policy,
+    #         env=vec_envs[agent_id],
+    #         verbose=1,
+    #         tensorboard_log=os.path.join(save_dir, f"tb_agent_{agent_id}")
+    #     )
+
+
+    # #################################
+    # ###         CALLBACKS         ###
+    # #################################
+    # callbacks = {}
+    # for agent_id in agent_ids:
+    #     callbacks[agent_id] = [
+    #         EvalCallback(
+    #             eval_envs[agent_id],
+    #             best_model_save_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
+    #             log_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
+    #             eval_freq=100_000,
+    #             deterministic=True,
+    #             render=False,
+    #         ),
+    #         CheckpointCallback(
+    #             save_freq=500_000 // n_envs,
+    #             save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
+    #             name_prefix=f"agent_{agent_id}"
+    #         ),
+    #         RewardLoggingCallback()
+    #     ]
+
 
     #################################
     ###       TRAINING LOOP       ###
@@ -158,143 +209,46 @@ def train(env=DEFAULT_ENV,
     n_iters = total_timesteps // update_interval
     for it in range(1, n_iters + 1):
         for agent_id in agent_ids:
-            print(f"[Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
-            # Training
-            play_env.train_agent_against_average(agent_id)
+            print(f"[{strategy.upper()} Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
 
-            # Exploitability
-            exp_opp, exp_ego, exploitability, sum_exploitability = play_env.compute_exploitability()
-            play_env.logger.log({
-                "fsp_iteration": n_iters + 1,
-                "exploitability/total": exploitability,
-                "exploitability/mean": sum_exploitability,
-                "exploitability/opp": exp_opp,
-                "exploitability/ego": exp_ego,
-            })
-
-            print(f"Exploitability after FSP Iteration {n_iters + 1}: {exploitability:.4f}")
-            print(f"Mean Exploitability: {sum_exploitability:.4f}")
-
-            # Plot traj
-            # for env in vec_envs[agent_id].envs:
-            #     env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
-
-    ### SAVE FINAL MODELS ###
-    play_env.evalutate(it)
-    for agent_id in agent_ids:
-        models[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
-    print(f"[INFO] Training complete. Models saved in {save_dir}")
-
-    return
-
-    #################################
-    ###    LOAD/INITIATE MODELS   ###
-    #################################
-    vec_envs = {}
-    eval_envs = {}
-    models = {}
-    for agent_id in agent_ids:
-        # Create vectorized training environments
-        vec_envs[agent_id] = VecMonitor(
-            DummyVecEnv([make_env(ma_env, agent_id, seed=42 + agent_id, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
-        )
-        # Check env access
-        print(f'[INFO] Agent {agent_id} action space:', vec_envs[agent_id].action_space)
-        print(f'[INFO] Agent {agent_id} observation space:', vec_envs[agent_id].observation_space)
-
-        # Create evaluation environments
-        eval_envs[agent_id] = VecMonitor(
-            DummyVecEnv([
-                make_env(ma_env, agent_id, seed=1000 + agent_id, n_envs=1, flight_mode=flight_mode)
-            ])
-        )
-
-        # Train model
-        models[agent_id] = SAC(
-            policy=policy,
-            env=vec_envs[agent_id],
-            verbose=1,
-            tensorboard_log=os.path.join(save_dir, f"tb_agent_{agent_id}")
-        )
-
-
-    #################################
-    ###         CALLBACKS         ###
-    #################################
-    callbacks = {}
-    for agent_id in agent_ids:
-        callbacks[agent_id] = [
-            EvalCallback(
-                eval_envs[agent_id],
-                best_model_save_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
-                log_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
-                eval_freq=100_000,
-                deterministic=True,
-                render=False,
-            ),
-            CheckpointCallback(
-                save_freq=500_000 // n_envs,
-                save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
-                name_prefix=f"agent_{agent_id}"
-            ),
-            RewardLoggingCallback()
-        ]
-
-    # Averaging buffer
-    average_policies = {agent_id: [] for agent_id in agent_ids}
-
-    #################################
-    ###       TRAINING LOOP       ###
-    #################################
-    n_iters = total_timesteps // update_interval
-    for it in range(1, n_iters + 1):
-        for agent_id in agent_ids:
-            print(f"[Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
-            models[agent_id].learn(
-                total_timesteps=update_interval,
-                reset_num_timesteps=False,
-                callback=callbacks[agent_id]
-            )
-
-            # Optionally, broadcast policy to all opponents
             if strategy == "double_oracle":
+                models[agent_id].learn(
+                    total_timesteps=update_interval,
+                    reset_num_timesteps=False,
+                    callback=callbacks[agent_id]
+                )
                 for other_id in agent_ids:
                     if other_id != agent_id:
                         for env in vec_envs[other_id].envs:
                             env.opp_policy = models[agent_id]
-            elif strategy == "fictitious_play":
-                # Update average policy list
-                average_policies[agent_id].append(models[agent_id])
-                # Broadcast
-                for other_id in agent_ids:
-                    if other_id != agent_id:
-                        def sample_average_policy(agent_list):
-                            class AveragePolicy:
-                                def __init__(self, policies):
-                                    self.policies = policies
-                                def predict(self, obs, deterministic=True):
-                                    # Sample from historical best responses
-                                    policy = np.random.choice(self.policies)
-                                    return policy.predict(obs, deterministic)
-                            return AveragePolicy(agent_list)
+            elif strategy == "fp":
+                # Training
+                Trainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
 
-                        avg_policy = sample_average_policy(average_policies[agent_id])
-                        for env in vec_envs[other_id].envs:
-                            env.opp_policy = avg_policy
+                # # Exploitability
+                # exp_opp, exp_ego, exploitability, sum_exploitability = play_env.compute_exploitability()
+                # Trainer.logger.log({
+                #     "fsp_iteration": n_iters + 1,
+                #     "exploitability/total": exploitability,
+                #     "exploitability/mean": sum_exploitability,
+                #     "exploitability/opp": exp_opp,
+                #     "exploitability/ego": exp_ego,
+                # })
 
-            # Plot traj
-            for env in vec_envs[agent_id].envs:
-                env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
+                # print(f"Exploitability after FSP Iteration {n_iters + 1}: {exploitability:.4f}")
+                # print(f"Mean Exploitability: {sum_exploitability:.4f}")
+
+            # # Plot traj
+            # for env in vec_envs[agent_id].envs:
+            #     env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
 
     ### SAVE FINAL MODELS ###
-    for agent_id in agent_ids:
-        models[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
+    for agent_id in range(Trainer.ma_env.num_possible_agents):
+        Trainer.current_br[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
     print(f"[INFO] Training complete. Models saved in {save_dir}")
 
     return
 
-
-    parallel_api_test(env, num_cycles=1_000_000)
 
 def str2bool(val):
     if isinstance(val, bool):

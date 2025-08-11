@@ -96,8 +96,6 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
             render_mode=render_mode,
         )
 
-        print("HELLLOOOOO")
-
         # some environment constants
         self.team_size = team_size
         self.spawn_min_radius = spawn_min_radius
@@ -219,8 +217,6 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
         start_orn[:, 2] = (
             start_radian + np_random.random(self.num_possible_agents) * np.pi / 8.0
         )
-
-        print("START POS: ", start_pos)
 
         return start_pos, start_orn
 
