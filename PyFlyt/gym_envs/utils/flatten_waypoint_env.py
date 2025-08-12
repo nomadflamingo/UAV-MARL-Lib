@@ -30,9 +30,10 @@ class FlattenWaypointEnv(ObservationWrapper):
             )
         self.context_length = context_length
         self.attitude_shape = env.observation_space["attitude"].shape[0]  # type: ignore [reportGeneralTypeIssues]
-        self.target_shape = env.observation_space["target_deltas"].feature_space.shape[  # type: ignore [reportGeneralTypeIssues]
-            0
-        ]  # type: ignore [reportGeneralTypeIssues]
+        # self.target_shape = env.observation_space["target_deltas"].feature_space.shape[  # type: ignore [reportGeneralTypeIssues]
+        #     0
+        # ]  # type: ignore [reportGeneralTypeIssues]
+        self.target_shape = env.observation_space["target_deltas"].shape[0]
         self.observation_space = Box(
             low=-np.inf,
             high=np.inf,

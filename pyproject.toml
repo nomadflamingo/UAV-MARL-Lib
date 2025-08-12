@@ -16,7 +16,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["numba", "numpy < 2.0.0", "scipy", "gymnasium", "pettingzoo", "pybullet", "pyyaml"]
+dependencies = ["numba", "numpy < 2.0.0", "scipy", "gymnasium", "pettingzoo", "pybullet", "pyyaml",
+                "wandb", "stable_baselines3", "tensorboard"]
 keywords = ["Reinforcement Learning", "UAVs", "drones", "Quadcopter", "AI", "RL", "Gymnasium"]
 license = { file="./LICENSE.txt" }
 
@@ -27,6 +28,7 @@ dev = [
   "codecov",
   "pre-commit",
   "matplotlib",
+  "wandb",
 ]
 
 [tool.setuptools]
