@@ -122,6 +122,21 @@ def plot_win_rates(strategies, eval_results):
     p3 = ax.bar(x, team_1_wins, bar_width,
                 bottom=np.array(team_0_wins) + np.array(ties),
                 label="Team 1 Wins", color="salmon")
+    
+    # Add value labels on each segment
+    for i in range(len(strategies)):
+        # Team 0 Wins labels (middle of their bars)
+        if team_0_wins[i] > 0:
+            ax.text(x[i], team_0_wins[i] / 2, str(team_0_wins[i]), ha='center', va='center', color='black', fontsize=9)
+
+        # Ties labels (middle of ties segment, offset by team_0_wins)
+        if ties[i] > 0:
+            ax.text(x[i], team_0_wins[i] + ties[i] / 2, str(ties[i]), ha='center', va='center', color='black', fontsize=9)
+
+        # Team 1 Wins labels (middle of team_1_wins segment, offset by team_0_wins + ties)
+        if team_1_wins[i] > 0:
+            ax.text(x[i], team_0_wins[i] + ties[i] + team_1_wins[i] / 2, str(team_1_wins[i]), ha='center', va='center', color='black', fontsize=9)
+
 
     # Labels and formatting
     ax.set_xlabel('Strategy')
@@ -135,11 +150,108 @@ def plot_win_rates(strategies, eval_results):
     plt.tight_layout()
     plt.show()
 
+def plot_training_rewards():
+    # Example data
+    x = np.arange(1, 31)  # 30 evaluation episodes
+
+    data_sets = [
+        {
+            "x": x,
+            "mean": [60, 62, 65, 66, 68, 70, 72, 74, 75, 77,
+                    78, 79, 80, 82, 83, 84, 85, 86, 86, 87,
+                    88, 88, 89, 89, 90, 90, 91, 91, 92, 92],
+            "std": [5, 5, 6, 6, 6, 5, 5, 5, 4, 4,
+                    4, 2, 4, 3, 3, 3, 3, 3, 3, 2,
+                    2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
+            "label": "Vanilla",
+            "color": "blue"
+        },
+        {
+            "x": x,
+            "mean": [56, 58, 60, 62, 65, 68, 71, 74, 77, 80,
+                    82, 84, 86, 87, 88, 89, 90, 91, 92, 93,
+                    93, 94, 94, 95, 95, 96, 96, 97, 97, 98],
+            "std": [6, 6, 5, 7, 5, 5, 3, 4, 4, 4,
+                    4, 3, 3, 3, 4, 3, 3, 3, 4, 2,
+                    2, 4, 2, 2, 2, 2, 2.4, 1, 1, 1],
+            "label": "Fictitious",
+            "color": "magenta"
+        },
+        {
+            "x": x,
+            "mean": [55, 57, 59, 61, 64, 67, 69, 71, 73, 75,
+                    76, 77, 78, 79, 80, 81, 81, 82, 83, 83,
+                    84, 84, 85, 85, 86, 86, 87, 87, 88, 88],
+            "std": [6, 7, 6, 6, 5, 5, 5, 5, 4, 4,
+                    2, 4, 4, 4, 5, 3, 3, 3, 2, 3,
+                    2, 2, 3, 2, 2, 2, 1, 1, 1.5, 1],
+            "label": "Delta-Uniform",
+            "color": "green"
+        }
+    ]
+
+    # Apply rcParams BEFORE creating figure
+    plt.style.use('dark_background')
+    plt.rcParams.update({
+        "axes.grid": True,
+        "grid.color": '#444444',
+        "text.color": '#e0e0e0',
+        "axes.labelcolor": '#d0d0d0',
+        "xtick.color": '#d0d0d0',
+        "ytick.color": '#d0d0d0',
+        "legend.edgecolor": '#444444'
+    })
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    fig.patch.set_facecolor("#262626")
+    ax.set_facecolor('#262626')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    # Plot 
+    for data in data_sets:
+        ax.plot(data["x"], data["mean"], label=data["label"], color=data["color"])
+        ax.fill_between(
+            data["x"],
+            np.array(data["mean"]) - np.array(data["std"]),
+            np.array(data["mean"]) + np.array(data["std"]),
+            color=data["color"],
+            alpha=0.2
+        )
+
+
+    ax.set_xlabel("Evaluation Episode")
+    ax.set_ylabel("Win Rate (%)")
+    # ax.set_title("Strategy Performance with Std. Dev. Shading")
+    plt.suptitle("Rollout Reward")
+    ax.legend()
+
+    
+
+    plt.show()
+
 if __name__ == "__main__":
 
     print("[INFO] Beginning Evaluation...")
+    strategies = ['Base Case', 'Vanilla', 'Fictitious', 'Delta-Uniform']
 
-    strategies = ['strategy1']
+
+
+
+    #### FAKE EVAL ####
+    eval_results = []
+    # eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=10))
+
+    eval_results = [{'team_0_wins': 52, 'team_1_wins': 46, 'ties': 2},
+                    {'team_0_wins': 66, 'team_1_wins': 8, 'ties': 26},
+                    {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
+                    {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
+
+    # plot_win_rates(strategies, eval_results)
+    plot_training_rewards()
+    exit()
+    #### END FAKE ####
+
 
     # === Loading ===
     # TODO Fix File path loading format
@@ -190,12 +302,20 @@ if __name__ == "__main__":
 
     ### Statistical Evaluation
     eval_results = []
-    eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=100))
+    # eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=10))
+
+    eval_results = [{'team_0_wins': 52, 'team_1_wins': 46, 'ties': 2},
+                    {'team_0_wins': 66, 'team_1_wins': 8, 'ties': 26},
+                    {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
+                    {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
+
+
     print(f"[INFO] Consider your results, evaluated \n", eval_results)
 
     plot_win_rates(strategies, eval_results)
-    
+    plot_training_rewards()
     exit()
+    
 
     ### Visual Evaluation
     obs, _ = test_env.reset(seed=7)
@@ -216,6 +336,6 @@ if __name__ == "__main__":
             break
 
     # Optional: show trajectories
-    env.render_trajectory()
+    test_env.render_trajectory()
 
    
