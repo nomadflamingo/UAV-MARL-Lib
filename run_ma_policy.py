@@ -185,7 +185,7 @@ def plot_training_rewards():
             "std": [6, 7, 6, 6, 5, 5, 5, 5, 4, 4,
                     2, 4, 4, 4, 5, 3, 3, 3, 2, 3,
                     2, 2, 3, 2, 2, 2, 1, 1, 1.5, 1],
-            "label": "Delta-Uniform",
+            "label": "D-Uniform",
             "color": "green"
         }
     ]
@@ -203,8 +203,8 @@ def plot_training_rewards():
     })
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    fig.patch.set_facecolor("#262626")
-    ax.set_facecolor('#262626')
+    fig.patch.set_facecolor("#040404")
+    ax.set_facecolor('#040404')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
