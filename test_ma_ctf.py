@@ -73,10 +73,15 @@ def run(ma_env, output_folder=DEFAULT_OUTPUT_FOLDER, fps=30):
     # ctrl = [DSLPIDControl(drone_model=DroneModel("cf2x")) for i in range(env.num_agents)]
 
     #### Make default waypoints ########################################
+    num_agents = ma_env.num_possible_agents
+    num_waypoints = 300
+
     xy_list = generate_circle_points(radius=1.0, n=300)
     start_pos0 = [[float(x), float(y), 0.0, 1.0] for (x, y) in xy_list]
     waypoints = np.array(start_pos0, dtype=np.float32)
     wp_counter = 0
+
+    spacing = num_waypoints // num_agents
     
 
     #### Reset Env #####################################################
@@ -93,10 +98,12 @@ def run(ma_env, output_folder=DEFAULT_OUTPUT_FOLDER, fps=30):
     # === Main loop ===
     for i in range(6*ma_env.agent_hz):
 
-        obs, rewards, dones, truncs, infos = ma_env.step({
-            "uav_0": waypoints[wp_counter%300],
-            "uav_1": waypoints[(wp_counter+150)%300],
-        })
+        actions = {}
+        for i, agent in enumerate(ma_env.agents):
+            idx = (wp_counter + i * spacing) % num_waypoints
+            actions[agent] = waypoints[idx]
+
+        obs, rewards, dones, truncs, infos = ma_env.step(actions)
 
         # Render frame
         ma_env.render()
