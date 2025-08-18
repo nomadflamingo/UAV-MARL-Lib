@@ -46,7 +46,7 @@ def load_models():
 
 def evaluate_and_record(ma_env, model_ego, model_adv,
                         num_episodes: int = 10,
-                        output_dir: str = "videos_fwing",
+                        output_dir: str = "videos_ctf",
                         fps: int = 30):
     os.makedirs(output_dir, exist_ok=True)
 

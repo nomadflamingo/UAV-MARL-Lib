@@ -7,6 +7,8 @@ import gymnasium as gym
 from gymnasium.wrappers import FlattenObservation
 import numpy as np
 import torch
+import imageio.v2 as imageio
+import pybullet as p
 
 # Stable baselines
 from stable_baselines3 import PPO, SAC
@@ -19,32 +21,53 @@ from PyFlyt.CL2_envs.quadx_capture_flag import QuadXCaptureFlagEnv
 from PyFlyt.CL2_envs.utils.utils import generate_circle_points
 
 # gym_pybullet_drones
+sys.path.append("/home/nathan/UMASS")
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.control.DSLPIDControl import DSLPIDControl
 
 # Global Defaults
-DEFAULT_RETRAIN = False
-DEFAULT_FLIGHT_MODE = 0
-DEFAULT_OUTPUT_FOLDER = 'results'
+DEFAULT_FLIGHT_MODE = 7
+DEFAULT_OUTPUT_FOLDER = "videos_ctf"
 
 def make_flat_env():
     env = QuadXWaypointsEnv(render_mode=None, flight_mode=DEFAULT_FLIGHT_MODE)
     return FlattenObservation(env)
 
+def make_env(render_mode: str = "human"):
+    return QuadXCaptureFlagEnv(render_mode="human", flight_mode=7)
 
-def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folder=DEFAULT_OUTPUT_FOLDER):
+def get_debug_visualizer_frame(env, width=944, height=944): # 944
+    img = env.unwrapped.aviary.getCameraImage(
+        width=width,
+        height=height,
+        viewMatrix=env.unwrapped.aviary.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=[0, 0, 40],
+            distance=60.0,
+            yaw=45,
+            pitch=45,
+            roll=0,
+            upAxisIndex=2
+        ),
+        # projectionMatrix=env.unwrapped.aviary.computeProjectionMatrixFOV(
+        #     fov=60.0,
+        #     aspect=float(width) / height,
+        #     nearVal=0.1,
+        #     farVal=100.0
+        # ),
+        # renderer=env.unwrapped.aviary.ER_BULLET_HARDWARE_OPENGL
+    )
+    rgb_array = np.reshape(img[2], (height, width, 4))[:, :, :3]  # Drop alpha
+    return rgb_array
+
+def run(ma_env, output_folder=DEFAULT_OUTPUT_FOLDER, fps=30):
 
     print("\n\n\n[INFO] Starting Demonstration...\n")
     # Filename
-    filename = os.path.join(output_folder, 'save-'+datetime.now().strftime("%m.%d.%Y_%H.%M.%S"))
-    if not os.path.exists(filename):
-        os.makedirs(filename+'/')
+    os.makedirs(output_folder, exist_ok=True)
 
     #### Create the environment ########################################
-    env = QuadXCaptureFlagEnv(render_mode="human", flight_mode=7)
-
-    # PYB_CLIENT = env.getPyBulletClient()
+    
 
     #### Initialze the controller ######################################
     # ctrl = [DSLPIDControl(drone_model=DroneModel("cf2x")) for i in range(env.num_agents)]
@@ -57,29 +80,41 @@ def train(retrain=DEFAULT_RETRAIN, flight_mode=DEFAULT_FLIGHT_MODE, output_folde
     
 
     #### Reset Env #####################################################
-    obs, _ = env.reset()
+    obs, _ = ma_env.reset()
 
     # print(obs)
     # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-    # === Main loop ===
-    for i in range(15*env.agent_hz):
+    # grab initial camera image
+    # frames.append(ma_env.unwrapped.aviary.drones[1].rgbaImg)
+    frames = []
+    # frames.append(get_debug_visualizer_frame(ma_env))
 
-        obs, rewards, dones, truncs, infos = env.step({
+    # === Main loop ===
+    for i in range(6*ma_env.agent_hz):
+
+        obs, rewards, dones, truncs, infos = ma_env.step({
             "uav_0": waypoints[wp_counter%300],
             "uav_1": waypoints[(wp_counter+150)%300],
         })
 
         # Render frame
-        env.render()
-        time.sleep(1.0 / env.agent_hz)
+        ma_env.render()
+        time.sleep(1.0 / ma_env.agent_hz)
+
+        # Get new frame
+        frames.append(get_debug_visualizer_frame(ma_env))
 
         # Exit if either agent is done
         # if any(dones.values()) or any(truncs.values()):
         #     break
         wp_counter += 1
 
-    
+    path = os.path.join(output_folder, f"episode_wide.mp4")
+    writer = imageio.get_writer(path, fps=fps, codec='libx264', quality=8)
+    for f in frames:
+        writer.append_data(f)
+    writer.close()
 
 def str2bool(val):
     if isinstance(val, bool):
@@ -92,8 +127,11 @@ def str2bool(val):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Multi-agent Capture the flag environment")
-    parser.add_argument('--retrain',       default=DEFAULT_RETRAIN,       type=str2bool, help='Retrain existing model.')
-    parser.add_argument('--flight_mode',   default=DEFAULT_FLIGHT_MODE,   type=int,      help='Flight mode (0=default).')
-    parser.add_argument('--output_folder', default=DEFAULT_OUTPUT_FOLDER, type=str,      help='Folder where to save logs (default: "results")', metavar='')
-    ARGS = parser.parse_args()
-    train(**vars(ARGS))
+    # parser.add_argument('--retrain',       default=DEFAULT_RETRAIN,       type=str2bool, help='Retrain existing model.')
+    # parser.add_argument('--flight_mode',   default=DEFAULT_FLIGHT_MODE,   type=int,      help='Flight mode (0=default).')
+    # parser.add_argument('--output_folder', default=DEFAULT_OUTPUT_FOLDER, type=str,      help='Folder where to save logs (default: "results")', metavar='')
+    # ARGS = parser.parse_args()
+    # train(**vars(ARGS))
+
+    env = make_env(render_mode="human")
+    run(env)

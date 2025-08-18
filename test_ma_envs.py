@@ -28,8 +28,14 @@ ENV_REGISTRY = {
     "combat": CombatWaypointPursuitEnv,      # Results Questionable
     "hover": MAQuadXHoverEnv,
 }
+STRAT_REGISTRY = ['vp',     # Vanilla Play
+                  'fp',     # Fictitious Play
+                  'dp',     # Delta-Uniform Play
+                  'svp',    # Vanilla Self-Play
+                  'sfp',    # Fictitious Self-Play
+                  'sdp']    # Delta-Uniform Self-Play
 
-DEFAULT_ENV = 'hover'
+DEFAULT_ENV = 'dogfight_FW'
 DEFAULT_RETRAIN = False
 DEFAULT_TRAINED_FOLDER = 'name'
 DEFAULT_FLIGHT_MODE = 0
@@ -39,6 +45,7 @@ DEFAULT_NUM_AGENTS = 4
 DEFAULT_TOTAL_TIMESTEPS = int(1e2)
 DEFAULT_UPDATE_INTERVAL = int(20)
 DEFAULT_NUM_ENVS = 8
+DEFAULT_STRAT = STRAT_REGISTRY[3]
 
 class RewardLoggingCallback(BaseCallback):
     def __init__(self, verbose=0):
@@ -89,7 +96,7 @@ def train(env=DEFAULT_ENV,
           total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
           update_interval=DEFAULT_UPDATE_INTERVAL,
           n_envs=DEFAULT_NUM_ENVS,
-          strategy="fp",
+          strategy=DEFAULT_STRAT,
           policy_type="SAC",):
     """
     Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
@@ -103,14 +110,16 @@ def train(env=DEFAULT_ENV,
     ### INITIATE THE ENVIRONMENTS ###
     #################################
     env_class = ENV_REGISTRY[env]
-    ma_env = env_class(render_mode=None, flight_mode=flight_mode)
     if env == 'hover':
         policy = 'MlpPolicy'
         target_reward = 1600
-    elif env == 'dogfight':
+        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
+    elif env == 'dogfight_FW':
         policy = 'MultiInputPolicy'
+        ma_env = env_class(render_mode=None)
     elif env == 'combat':
         policy = 'MultiInputPolicy'
+        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
     else:
         print("[ERROR] This environment is not currently suited to train the environment,", env)
         exit()
@@ -130,23 +139,7 @@ def train(env=DEFAULT_ENV,
             policy=policy,
             verbose=1,
             tensorboard_log=os.path.join(save_dir, "fsp_logs"),)
-    Trainer = FictitiousPlayEnv(env_class, agent_ids, save_dir, sac_kwargs)
-    # main
-    # print("[INFO] Populating fictitious play policy buffer...")
-    # FspTrainer.populate_buffer()
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 1
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 1
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # for it in range(total_timesteps // update_interval):
-    #     for agent_id in agent_ids:
-    #         print(f"[FSP Iter {it}] ▶ Training BR for Agent {agent_id}")
+    Trainer = FictitiousPlayEnv(env_class, agent_ids, strategy, save_dir, sac_kwargs)
 
 
     # #################################
@@ -221,7 +214,7 @@ def train(env=DEFAULT_ENV,
                     if other_id != agent_id:
                         for env in vec_envs[other_id].envs:
                             env.opp_policy = models[agent_id]
-            elif strategy == "fp":
+            else:
                 # Training
                 Trainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
 
