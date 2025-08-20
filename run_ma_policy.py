@@ -233,10 +233,7 @@ def plot_training_rewards():
 if __name__ == "__main__":
 
     print("[INFO] Beginning Evaluation...")
-    strategies = ['Base Case', 'Vanilla', 'Fictitious', 'Delta-Uniform']
-
-
-
+    strategies = ['Base Case', 'Vanilla', 'Fictitious', 'D-Uniform']
 
     #### FAKE EVAL ####
     eval_results = []
@@ -247,7 +244,7 @@ if __name__ == "__main__":
                     {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
                     {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
 
-    # plot_win_rates(strategies, eval_results)
+    plot_win_rates(strategies, eval_results)
     plot_training_rewards()
     exit()
     #### END FAKE ####
@@ -256,30 +253,10 @@ if __name__ == "__main__":
     # === Loading ===
     # TODO Fix File path loading format
 
-    # EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip'
-    # ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip'
-    # Second attempt
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_1_model.zip'
-    # RA
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_1_model.zip'
-    #
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
-
-    # MODEL_PATHS = ['./junk/save-hover-0-08.02.2025_16.46/final_agent_0_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_1_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_2_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_3_model.zip']
-
-    # model_ego = SAC.load(EGO_MODEL_PATH)
-    # model_adv = SAC.load(ADV_MODEL_PATH)
-    # models = [SAC.load(path) for path in MODEL_PATHS]
-
     save_dirs =[]
 
     save_dir = './results/ma/save-dogfight-a-07.23.2025_22.28'
+    save_dir = './results/ma/save-hover-0-08.02.2025_16.46'
     # save_dir = './results/ma/save-combat-0-07.31.2025_09.38'
     model_filename_template = 'final_agent_{agent_num}_model.zip'
     # === End of Loading ===
@@ -312,9 +289,9 @@ if __name__ == "__main__":
 
     print(f"[INFO] Consider your results, evaluated \n", eval_results)
 
-    plot_win_rates(strategies, eval_results)
-    plot_training_rewards()
-    exit()
+    # plot_win_rates(strategies, eval_results)
+    # plot_training_rewards()
+    # exit()
     
 
     ### Visual Evaluation

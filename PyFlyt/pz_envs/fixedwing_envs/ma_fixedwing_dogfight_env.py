@@ -188,7 +188,7 @@ class MAFixedwingDogfightEnv(MAFixedwingBaseEnv):
 
         """
         # seed the RNG
-        print("Seed", seed)
+        # print("Seed", seed)
         np_random = np.random.RandomState(seed=seed)
 
         # start out pointing in outward directions equally spaced
