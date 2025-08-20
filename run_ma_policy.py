@@ -203,8 +203,8 @@ def plot_training_rewards():
     })
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    fig.patch.set_facecolor("#040404")
-    ax.set_facecolor('#040404')
+    fig.patch.set_facecolor("#131313") #040404 too dark, 
+    ax.set_facecolor('#131313')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -233,7 +233,7 @@ def plot_training_rewards():
 if __name__ == "__main__":
 
     print("[INFO] Beginning Evaluation...")
-    strategies = ['Base Case', 'Vanilla', 'Fictitious', 'Delta-Uniform']
+    strategies = ['Base Case', 'Vanilla', 'Fictitious', 'D-Uniform']
 
 
 
