@@ -70,22 +70,22 @@ class FlagHandler:
         self.targets = np.array(start_pos0, dtype=np.float32)
 
         # if we are rendering, load in the targets
-        if self.enable_render:
-            self.target_visual = []
-            for target in self.targets:
-                self.target_visual.append(
-                    self.p.loadURDF(
-                        self.targ_obj_dir,
-                        basePosition=target,
-                        useFixedBase=True,
-                        globalScaling=self.flag_reach_distance,
-                    )
-                )
+        # if self.enable_render:
+        #     self.target_visual = []
+        #     for target in self.targets:
+        #         self.target_visual.append(
+        #             self.p.loadURDF(
+        #                 self.targ_obj_dir,
+        #                 basePosition=target,
+        #                 useFixedBase=True,
+        #                 globalScaling=self.flag_reach_distance,
+        #             )
+        #         )
 
-            for i, visual in enumerate(self.target_visual):
-                self.p.changeVisualShape(
-                    visual,
-                    linkIndex=-1,
-                    rgbaColor=(0, 1 - (i / len(self.target_visual)), 0, 0.25),
-                )
+        #     for i, visual in enumerate(self.target_visual):
+        #         self.p.changeVisualShape(
+        #             visual,
+        #             linkIndex=-1,
+        #             rgbaColor=(0, 1 - (i / len(self.target_visual)), 0, 0.25),
+        #         )
 

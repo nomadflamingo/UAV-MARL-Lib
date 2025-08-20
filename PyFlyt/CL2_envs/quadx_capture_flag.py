@@ -29,9 +29,14 @@ class QuadXCaptureFlagEnv(MAQuadXBaseEnv):
 
     """
 
+    metadata = {
+        "render_modes": ["human"],
+        "name": "ma_quadx_ctf",
+    }
+
     def __init__(self, 
                  sparse_reward: bool = False,
-                 num_agents: int = 2,
+                 num_agents: int = 5,
                  num_flags: int = 4,
                  flag_reach_distance: float = 0.2,
                  flight_mode: int = 0, 
@@ -47,7 +52,7 @@ class QuadXCaptureFlagEnv(MAQuadXBaseEnv):
         
         # Spawn agnet positions
         self.height = 1.0
-        xy_list = generate_circle_points(radius=flight_dome_size/2.0, n=num_agents)
+        xy_list = generate_circle_points(radius=flight_dome_size/5.0, n=num_agents)
         start_pos0 = [[float(x), float(y), self.height] for (x, y) in xy_list]
         start_pos = np.array(start_pos0, dtype=np.float32)
         start_orn = np.zeros_like(start_pos)
@@ -111,6 +116,23 @@ class QuadXCaptureFlagEnv(MAQuadXBaseEnv):
         super().begin_reset(seed, options)
         # Reset waypoints and clear trajectories
         self.flags.reset(self.aviary, np.random.default_rng())
+
+        # Colour teams
+        # if we're rendering, set the colors of the wingtips and tail components
+        # if self.render_mode:
+        #     for agent_id in range(self.num_possible_agents):
+        #         # wingtips and tail component IDs
+        #         for component_id in [1, 2, 3, 4]:
+        #             self.aviary.changeVisualShape(
+        #                 self.aviary.drones[agent_id].Id,
+        #                 -1,
+        #                 rgbaColor=(
+        #                     np.array([1.0, 0.0, 0.0, 1.0])
+        #                     if (agent_id+1)%2
+        #                     else np.array([0.0, 0.0, 1.0, 1.0])
+        #                 ),
+        #             )
+
         super().end_reset()
 
         observations = {
@@ -239,15 +261,15 @@ class QuadXCaptureFlagEnv(MAQuadXBaseEnv):
 
 
                     dist = np.linalg.norm(lin_pos - flag_pos)
-                    if dist < self.flags.flag_reach_distance:
-                        team = self.agent_teams[ag]
-                        color = self.flags.team_colors[team]
-                        if self.render_mode:
-                            self.flags.p.changeVisualShape(
-                                self.flags.target_visual[flag_idx],
-                                linkIndex=-1,
-                                rgbaColor=color,
-                            )
+                    # if dist < self.flags.flag_reach_distance:
+                    #     team = self.agent_teams[ag]
+                    #     color = self.flags.team_colors[team]
+                    #     if self.render_mode:
+                    #         self.flags.p.changeVisualShape(
+                    #             self.flags.target_visual[flag_idx],
+                    #             linkIndex=-1,
+                    #             rgbaColor=color,
+                    #         )
 
             # update reward, term, trunc, for each agent
             # TODO: make it so this doesn't have to be computed every aviary step

@@ -19,6 +19,8 @@ from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 
+DARKNESS = '#060606' #040404 too dark,# 131313 too bright
+
 # Global Defaults
 ENV_REGISTRY = {
     "dogfight": MAFixedwingDogfightEnvV2,
@@ -115,13 +117,30 @@ def plot_win_rates(strategies, eval_results):
     x = np.arange(len(strategies))
     bar_width = 0.6
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    # Apply rcParams BEFORE creating figure
+    plt.style.use('dark_background')
+    plt.rcParams.update({
+        "axes.grid": True,
+        "grid.color": '#444444',
+        "text.color": '#e0e0e0',
+        "axes.labelcolor": '#d0d0d0',
+        "xtick.color": '#d0d0d0',
+        "ytick.color": '#d0d0d0',
+        "legend.edgecolor": '#444444'
+    })
 
-    p1 = ax.bar(x, team_0_wins, bar_width, label="Team 0 Wins", color="skyblue")
-    p2 = ax.bar(x, ties, bar_width, bottom=team_0_wins, label="Ties", color="lightgray")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    fig.patch.set_facecolor(DARKNESS) 
+    ax.set_facecolor(DARKNESS)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.grid(False)
+
+    p1 = ax.bar(x, team_0_wins, bar_width, label="Team 0 Wins", color="cyan")
+    p2 = ax.bar(x, ties, bar_width, bottom=team_0_wins, label="Ties", color="#F5F5F5")
     p3 = ax.bar(x, team_1_wins, bar_width,
                 bottom=np.array(team_0_wins) + np.array(ties),
-                label="Team 1 Wins", color="salmon")
+                label="Team 1 Wins", color="magenta")
     
     # Add value labels on each segment
     for i in range(len(strategies)):
@@ -141,11 +160,11 @@ def plot_win_rates(strategies, eval_results):
     # Labels and formatting
     ax.set_xlabel('Strategy')
     ax.set_ylabel('Number of Games')
-    ax.set_title(f'Game Outcomes per Strategy ({iters} games)')
+    ax.set_title(f'Game Outcomes per Strategy ({iters} games)({DARKNESS})')
     ax.set_xticks(x)
     ax.set_xticklabels(strategies)
     ax.set_ylim(0, iters)
-    ax.legend()
+    # ax.legend()
 
     plt.tight_layout()
     plt.show()
@@ -203,8 +222,8 @@ def plot_training_rewards():
     })
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    fig.patch.set_facecolor("#131313") #040404 too dark, 
-    ax.set_facecolor('#131313')
+    fig.patch.set_facecolor(DARKNESS) #040404 too dark,# 131313 too bright
+    ax.set_facecolor(DARKNESS)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -223,7 +242,7 @@ def plot_training_rewards():
     ax.set_xlabel("Evaluation Episode")
     ax.set_ylabel("Win Rate (%)")
     # ax.set_title("Strategy Performance with Std. Dev. Shading")
-    plt.suptitle("Rollout Reward")
+    plt.suptitle(f"Rollout Reward {DARKNESS}")
     ax.legend()
 
     
@@ -247,7 +266,7 @@ if __name__ == "__main__":
                     {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
                     {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
 
-    # plot_win_rates(strategies, eval_results)
+    plot_win_rates(strategies, eval_results)
     plot_training_rewards()
     exit()
     #### END FAKE ####
@@ -256,30 +275,10 @@ if __name__ == "__main__":
     # === Loading ===
     # TODO Fix File path loading format
 
-    # EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_0_model.zip'
-    # ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_11.58/final_agent_1_model.zip'
-    # Second attempt
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.28.2025_16.45/final_agent_1_model.zip'
-    # RA
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_00.24/final_agent_1_model.zip'
-    #
-    EGO_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
-    ADV_MODEL_PATH = './results/ma/save-combat-0-07.29.2025_14.16/final_agent_0_model.zip'
-
-    # MODEL_PATHS = ['./junk/save-hover-0-08.02.2025_16.46/final_agent_0_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_1_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_2_model.zip',
-    #                './junk/save-hover-0-08.02.2025_16.46/final_agent_3_model.zip']
-
-    # model_ego = SAC.load(EGO_MODEL_PATH)
-    # model_adv = SAC.load(ADV_MODEL_PATH)
-    # models = [SAC.load(path) for path in MODEL_PATHS]
-
     save_dirs =[]
 
     save_dir = './results/ma/save-dogfight-a-07.23.2025_22.28'
+    save_dir = './results/ma/save-hover-0-08.02.2025_16.46'
     # save_dir = './results/ma/save-combat-0-07.31.2025_09.38'
     model_filename_template = 'final_agent_{agent_num}_model.zip'
     # === End of Loading ===
@@ -312,9 +311,9 @@ if __name__ == "__main__":
 
     print(f"[INFO] Consider your results, evaluated \n", eval_results)
 
-    plot_win_rates(strategies, eval_results)
-    plot_training_rewards()
-    exit()
+    # plot_win_rates(strategies, eval_results)
+    # plot_training_rewards()
+    # exit()
     
 
     ### Visual Evaluation

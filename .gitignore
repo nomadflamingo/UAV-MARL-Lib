@@ -153,6 +153,7 @@ cython_debug/
 ### Ignore RL models ###
 # Ignore 
 /junk/*
+/wandb/
 # Ignore everything under results
 /results/*
 

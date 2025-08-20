@@ -230,7 +230,7 @@ class Aviary(bullet_client.BulletClient):
 
         # reset the camera position to a sane place
         self.resetDebugVisualizerCamera(
-            cameraDistance=20,
+            cameraDistance=2.25,
             cameraYaw=30,
             cameraPitch=-30,
             cameraTargetPosition=[0, 0, 1],

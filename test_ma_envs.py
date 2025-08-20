@@ -7,6 +7,9 @@ from datetime import datetime
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, CheckpointCallback
+from wandb.integration.sb3 import WandbCallback
+from stable_baselines3.common.callbacks import CallbackList
+os.environ["WANDB_MODE"] = "online"
 # Gym
 import gymnasium as gym
 from gymnasium import spaces
@@ -18,7 +21,7 @@ from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 # pz
 from pettingzoo.test import parallel_api_test
 # SP
-from PyFlyt.marl_wrappers.selfplay import SelfPlayEnv, MASelfPlayEnv, FictitiousPlayEnv
+from PyFlyt.marl_wrappers.selfplay import MASelfPlayEnv, FictitiousPlayEnv #, SelfPlayEnv
 
 
 # Global Defaults
@@ -28,17 +31,35 @@ ENV_REGISTRY = {
     "combat": CombatWaypointPursuitEnv,      # Results Questionable
     "hover": MAQuadXHoverEnv,
 }
+STRAT_REGISTRY = ['vp',     # Vanilla Play
+                  'fp',     # Fictitious Play
+                  'dp',     # Delta-Uniform Play
+                  'svp',    # Vanilla Self-Play
+                  'sfp',    # Fictitious Self-Play
+                  'sdp']    # Delta-Uniform Self-Play
 
-DEFAULT_ENV = 'hover'
+DEFAULT_ENV = 'dogfight_FW'
 DEFAULT_RETRAIN = False
 DEFAULT_TRAINED_FOLDER = 'name'
 DEFAULT_FLIGHT_MODE = 0
 # DEFAULT_OUTPUT_FOLDER = 'results/ma'
 DEFAULT_OUTPUT_FOLDER = 'junk'
-DEFAULT_NUM_AGENTS = 4
-DEFAULT_TOTAL_TIMESTEPS = int(1e2)
-DEFAULT_UPDATE_INTERVAL = int(20)
+DEFAULT_NUM_AGENTS = 2
+DEFAULT_TOTAL_TIMESTEPS = int(5e3)
+DEFAULT_UPDATE_INTERVAL = int(1e3)
 DEFAULT_NUM_ENVS = 8
+DEFAULT_STRAT = STRAT_REGISTRY[5]
+
+class MyWandbCallback(WandbCallback):
+    def _on_step(self) -> bool:
+        # Print some info every 1000 steps
+        if self.num_timesteps % 1000 == 0:
+            # self.locals is a dict with local variables from training
+            rewards = self.locals.get('rewards', None)
+            print(f"[WandbCallback] Step {self.num_timesteps}, Last reward: {rewards}")
+
+        # Make sure we still call the parent method to log to wandb
+        return super()._on_step()
 
 class RewardLoggingCallback(BaseCallback):
     def __init__(self, verbose=0):
@@ -61,24 +82,6 @@ class RandomPolicy:
         # SB3 expects a tuple (action, state)
         return self.action_space.sample(), None
     
-# def make_env(ma_env, strat, train_agent_id: int, seed: int, n_envs: int, flight_mode: int):
-#     def _init():
-#         # ma_env = CombatWaypointPursuitEnv(render_mode=None, flight_mode=flight_mode)
-#         ma_env.reset()
-#         if strat == 'fp':
-#             env = FictitiousPlayEnv(ma_env)
-#         else: #strat == 'do':
-
-#             # random_opp = RandomPolicy(ma_env.action_space(ma_env.agents[1 - train_agent_id]))
-#             opp_policies = {
-#                 i: RandomPolicy(ma_env.action_space(i))
-#                 for i in range(ma_env.num_possible_agents) if i != train_agent_id
-#             }
-#             env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
-#             env.reset(seed=seed + train_agent_id)
-#         return env
-#     return _init
-
 ##### TRAINING FUNCTION #################################################################################
 def train(env=DEFAULT_ENV, 
           retrain=DEFAULT_RETRAIN, 
@@ -89,7 +92,7 @@ def train(env=DEFAULT_ENV,
           total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
           update_interval=DEFAULT_UPDATE_INTERVAL,
           n_envs=DEFAULT_NUM_ENVS,
-          strategy="fp",
+          strategy=DEFAULT_STRAT,
           policy_type="SAC",):
     """
     Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
@@ -103,14 +106,16 @@ def train(env=DEFAULT_ENV,
     ### INITIATE THE ENVIRONMENTS ###
     #################################
     env_class = ENV_REGISTRY[env]
-    ma_env = env_class(render_mode=None, flight_mode=flight_mode)
     if env == 'hover':
         policy = 'MlpPolicy'
         target_reward = 1600
-    elif env == 'dogfight':
-        policy = 'MultiInputPolicy'
+        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
+    elif env == 'dogfight_FW':
+        policy = 'MlpPolicy'
+        ma_env = env_class(render_mode=None)
     elif env == 'combat':
         policy = 'MultiInputPolicy'
+        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
     else:
         print("[ERROR] This environment is not currently suited to train the environment,", env)
         exit()
@@ -121,6 +126,19 @@ def train(env=DEFAULT_ENV,
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
 
+    wb = wandb.init(
+        project=f"overnight-{env}-project",
+        name=f"sac-{env}-{strategy}-{datetime.now().strftime('%m.%d.%Y_%H.%M')}",
+        config={
+            "algo": "SAC",
+            "env": env,
+            "timesteps": total_timesteps,
+            "update_interval": 1_000,
+            "checkpoint_freq": 1_000,
+            # "learning_rate": 3e-4,
+        },
+    )
+
 
     #################################
     ###   BREAK FOR FSP TESTING   ###
@@ -129,79 +147,48 @@ def train(env=DEFAULT_ENV,
     sac_kwargs=dict(
             policy=policy,
             verbose=1,
-            tensorboard_log=os.path.join(save_dir, "fsp_logs"),)
-    Trainer = FictitiousPlayEnv(env_class, agent_ids, save_dir, sac_kwargs)
-    # main
-    # print("[INFO] Populating fictitious play policy buffer...")
-    # FspTrainer.populate_buffer()
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 1
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 1
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # agent_id = 0
-    # FspTrainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
-    # for it in range(total_timesteps // update_interval):
-    #     for agent_id in agent_ids:
-    #         print(f"[FSP Iter {it}] ▶ Training BR for Agent {agent_id}")
+    )
 
+    Trainer = FictitiousPlayEnv(env_class, agent_ids, strategy, save_dir, sac_kwargs)
 
-    # #################################
-    # ###    LOAD/INITIATE MODELS   ###
-    # #################################
-    # vec_envs = {}
-    # eval_envs = {}
-    # models = {}
-    # for agent_id in agent_ids:
-    #     # Create vectorized training environments
-    #     vec_envs[agent_id] = VecMonitor(
-    #         DummyVecEnv([make_env(ma_env, strategy, agent_id, seed=42 + agent_id, n_envs=n_envs, flight_mode=flight_mode) for _ in range(n_envs)])
-    #     )
-    #     # Check env access
-    #     print(f'[INFO] Agent {agent_id} action space:', vec_envs[agent_id].action_space)
-    #     print(f'[INFO] Agent {agent_id} observation space:', vec_envs[agent_id].observation_space)
-
-    #     # Create evaluation environments
-    #     eval_envs[agent_id] = VecMonitor(
-    #         DummyVecEnv([
-    #             make_env(ma_env, strategy, agent_id, seed=1000 + agent_id, n_envs=1, flight_mode=flight_mode)
-    #         ])
-    #     )
-
-    #     # Train model
-    #     models[agent_id] = SAC(
-    #         policy=policy,
-    #         env=vec_envs[agent_id],
-    #         verbose=1,
-    #         tensorboard_log=os.path.join(save_dir, f"tb_agent_{agent_id}")
-    #     )
-
+    eval_envs = {}
+    for agent_id in agent_ids:
+        eval_envs[agent_id] = VecMonitor(
+            DummyVecEnv([
+                Trainer.make_env(ma_env, agent_id, seed=1000+agent_id, n_envs=1)
+            ])
+        )
 
     # #################################
     # ###         CALLBACKS         ###
     # #################################
-    # callbacks = {}
-    # for agent_id in agent_ids:
-    #     callbacks[agent_id] = [
-    #         EvalCallback(
-    #             eval_envs[agent_id],
-    #             best_model_save_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
-    #             log_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
-    #             eval_freq=100_000,
-    #             deterministic=True,
-    #             render=False,
-    #         ),
-    #         CheckpointCallback(
-    #             save_freq=500_000 // n_envs,
-    #             save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
-    #             name_prefix=f"agent_{agent_id}"
-    #         ),
-    #         RewardLoggingCallback()
-    #     ]
+    # wandb_callback = MyWandbCallback(
+    #     verbose=2,
+    #     model_save_path=None,
+    #     log="all",
+    #     gradient_save_freq=100,
+    #     # sync_tensorboard=True,  # <- important if you log via self.logger.record
+    # )
 
+    callbacks = {}
+    for agent_id in agent_ids:
+        callbacks[agent_id] = CallbackList([
+            EvalCallback(
+                eval_envs[agent_id],
+                best_model_save_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
+                log_path=os.path.join(save_dir, f"eval_agent_{agent_id}"),
+                eval_freq=1_000,
+                deterministic=True,
+                render=False,
+            ),
+            CheckpointCallback(
+                save_freq=1_000,
+                save_path=os.path.join(save_dir, f"checkpoints/agent_{agent_id}"),
+                name_prefix=f"agent_{agent_id}"
+            ),
+            RewardLoggingCallback(),
+            MyWandbCallback(),
+        ])
 
     #################################
     ###       TRAINING LOOP       ###
@@ -209,7 +196,7 @@ def train(env=DEFAULT_ENV,
     n_iters = total_timesteps // update_interval
     for it in range(1, n_iters + 1):
         for agent_id in agent_ids:
-            print(f"[{strategy.upper()} Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
+            print(f"\n[{strategy.upper()} Iter {it}/{n_iters}] ▶ Training Agent {agent_id}")
 
             if strategy == "double_oracle":
                 models[agent_id].learn(
@@ -221,9 +208,11 @@ def train(env=DEFAULT_ENV,
                     if other_id != agent_id:
                         for env in vec_envs[other_id].envs:
                             env.opp_policy = models[agent_id]
-            elif strategy == "fp":
+            else:
                 # Training
-                Trainer.train_agent(agent_id, total_timesteps=update_interval, callbacks=[])
+                Trainer.train_agent(agent_id, wb, total_timesteps=update_interval, callbacks=callbacks[agent_id])
+                # wandb.finish()
+                # exit()
 
                 # # Exploitability
                 # exp_opp, exp_ego, exploitability, sum_exploitability = play_env.compute_exploitability()
@@ -244,7 +233,11 @@ def train(env=DEFAULT_ENV,
 
     ### SAVE FINAL MODELS ###
     for agent_id in range(Trainer.ma_env.num_possible_agents):
-        Trainer.current_br[agent_id].save(os.path.join(save_dir, f"final_agent_{agent_id}_model"))
+        file = os.path.join(save_dir, f"final_agent_{agent_id}_model")
+        Trainer.current_br[agent_id].save(file)
+        wb.save(file)
+    
+    wandb.finish()
     print(f"[INFO] Training complete. Models saved in {save_dir}")
 
     return
