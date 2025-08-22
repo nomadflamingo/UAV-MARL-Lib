@@ -115,7 +115,7 @@ def run(ma_env, output_folder=DEFAULT_OUTPUT_FOLDER, fps=30):
         # Exit if either agent is done
         # if any(dones.values()) or any(truncs.values()):
         #     break
-        wp_counter += 1
+        # wp_counter += 1
 
     path = os.path.join(output_folder, f"episode_wide.mp4")
     writer = imageio.get_writer(path, fps=fps, codec='libx264', quality=8)

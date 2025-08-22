@@ -113,6 +113,35 @@ class QuadXCaptureFlagEnv(MAQuadXBaseEnv):
     def reset(
         self, *, seed: None | int = None, options: None | dict[str, Any] = None
     ):
+        # seed the RNG
+        # print("Seed", seed)
+        np_random = np.random.RandomState(seed=seed)
+
+        # start out pointing in outward directions equally spaced
+        start_x = np_random.uniform(
+            low=-1,
+            high=1,
+            size=(self.num_possible_agents,),
+        )
+        start_y = np_random.uniform(
+            low=-1,
+            high=1,
+            size=(self.num_possible_agents,),
+        )
+        start_z = np_random.uniform(
+            low=0.1,
+            high=1.2,
+            size=(self.num_possible_agents,),
+        )
+
+        # define the starting positions
+        start_pos = np.zeros((self.num_possible_agents, 3))
+        start_pos[:, 0] = start_x
+        start_pos[:, 1] = start_y
+        start_pos[:, 2] = start_z
+
+        self.start_pos = start_pos
+
         super().begin_reset(seed, options)
         # Reset waypoints and clear trajectories
         self.flags.reset(self.aviary, np.random.default_rng())

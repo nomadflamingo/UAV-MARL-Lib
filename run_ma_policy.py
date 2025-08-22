@@ -150,45 +150,9 @@ def plot_win_rates(strategies, eval_results):
     plt.tight_layout()
     plt.show()
 
-def plot_training_rewards():
+def plot_training_rewards(data_sets):
     # Example data
-    x = np.arange(1, 31)  # 30 evaluation episodes
-
-    data_sets = [
-        {
-            "x": x,
-            "mean": [60, 62, 65, 66, 68, 70, 72, 74, 75, 77,
-                    78, 79, 80, 82, 83, 84, 85, 86, 86, 87,
-                    88, 88, 89, 89, 90, 90, 91, 91, 92, 92],
-            "std": [5, 5, 6, 6, 6, 5, 5, 5, 4, 4,
-                    4, 2, 4, 3, 3, 3, 3, 3, 3, 2,
-                    2, 2, 2, 2, 2, 2, 1, 1, 1, 1],
-            "label": "Vanilla",
-            "color": "blue"
-        },
-        {
-            "x": x,
-            "mean": [56, 58, 60, 62, 65, 68, 71, 74, 77, 80,
-                    82, 84, 86, 87, 88, 89, 90, 91, 92, 93,
-                    93, 94, 94, 95, 95, 96, 96, 97, 97, 98],
-            "std": [6, 6, 5, 7, 5, 5, 3, 4, 4, 4,
-                    4, 3, 3, 3, 4, 3, 3, 3, 4, 2,
-                    2, 4, 2, 2, 2, 2, 2.4, 1, 1, 1],
-            "label": "Fictitious",
-            "color": "magenta"
-        },
-        {
-            "x": x,
-            "mean": [55, 57, 59, 61, 64, 67, 69, 71, 73, 75,
-                    76, 77, 78, 79, 80, 81, 81, 82, 83, 83,
-                    84, 84, 85, 85, 86, 86, 87, 87, 88, 88],
-            "std": [6, 7, 6, 6, 5, 5, 5, 5, 4, 4,
-                    2, 4, 4, 4, 5, 3, 3, 3, 2, 3,
-                    2, 2, 3, 2, 2, 2, 1, 1, 1.5, 1],
-            "label": "D-Uniform",
-            "color": "green"
-        }
-    ]
+    x = np.arange(1, 31)  # 30 evaluation episodes # TODO Read from data_sets
 
     # Apply rcParams BEFORE creating figure
     plt.style.use('dark_background')
@@ -235,21 +199,6 @@ if __name__ == "__main__":
     print("[INFO] Beginning Evaluation...")
     strategies = ['Base Case', 'Vanilla', 'Fictitious', 'D-Uniform']
 
-    #### FAKE EVAL ####
-    eval_results = []
-    # eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=10))
-
-    eval_results = [{'team_0_wins': 52, 'team_1_wins': 46, 'ties': 2},
-                    {'team_0_wins': 66, 'team_1_wins': 8, 'ties': 26},
-                    {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
-                    {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
-
-    plot_win_rates(strategies, eval_results)
-    plot_training_rewards()
-    exit()
-    #### END FAKE ####
-
-
     # === Loading ===
     # TODO Fix File path loading format
 
@@ -279,19 +228,11 @@ if __name__ == "__main__":
 
     ### Statistical Evaluation
     eval_results = []
-    # eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=10))
-
-    eval_results = [{'team_0_wins': 52, 'team_1_wins': 46, 'ties': 2},
-                    {'team_0_wins': 66, 'team_1_wins': 8, 'ties': 26},
-                    {'team_0_wins': 65, 'team_1_wins': 0, 'ties': 35},
-                    {'team_0_wins': 73, 'team_1_wins': 16, 'ties': 11}]
-
-
+    eval_results.append(evaluate_competitive_game(test_env_no_gui, models, num_episodes=10))
     print(f"[INFO] Consider your results, evaluated \n", eval_results)
-
-    # plot_win_rates(strategies, eval_results)
-    # plot_training_rewards()
-    # exit()
+    plot_win_rates(strategies, eval_results)
+    plot_training_rewards()
+    exit()
     
 
     ### Visual Evaluation
