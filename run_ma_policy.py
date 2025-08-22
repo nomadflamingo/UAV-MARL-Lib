@@ -19,6 +19,8 @@ from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
 
+DARKNESS = '#060606' #040404 too dark,# 131313 too bright
+
 # Global Defaults
 ENV_REGISTRY = {
     "dogfight": MAFixedwingDogfightEnvV2,
@@ -115,13 +117,30 @@ def plot_win_rates(strategies, eval_results):
     x = np.arange(len(strategies))
     bar_width = 0.6
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    # Apply rcParams BEFORE creating figure
+    plt.style.use('dark_background')
+    plt.rcParams.update({
+        "axes.grid": True,
+        "grid.color": '#444444',
+        "text.color": '#e0e0e0',
+        "axes.labelcolor": '#d0d0d0',
+        "xtick.color": '#d0d0d0',
+        "ytick.color": '#d0d0d0',
+        "legend.edgecolor": '#444444'
+    })
 
-    p1 = ax.bar(x, team_0_wins, bar_width, label="Team 0 Wins", color="skyblue")
-    p2 = ax.bar(x, ties, bar_width, bottom=team_0_wins, label="Ties", color="lightgray")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    fig.patch.set_facecolor(DARKNESS) 
+    ax.set_facecolor(DARKNESS)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    plt.grid(False)
+
+    p1 = ax.bar(x, team_0_wins, bar_width, label="Team 0 Wins", color="cyan")
+    p2 = ax.bar(x, ties, bar_width, bottom=team_0_wins, label="Ties", color="#F5F5F5")
     p3 = ax.bar(x, team_1_wins, bar_width,
                 bottom=np.array(team_0_wins) + np.array(ties),
-                label="Team 1 Wins", color="salmon")
+                label="Team 1 Wins", color="magenta")
     
     # Add value labels on each segment
     for i in range(len(strategies)):
@@ -141,11 +160,11 @@ def plot_win_rates(strategies, eval_results):
     # Labels and formatting
     ax.set_xlabel('Strategy')
     ax.set_ylabel('Number of Games')
-    ax.set_title(f'Game Outcomes per Strategy ({iters} games)')
+    ax.set_title(f'Game Outcomes per Strategy ({iters} games)({DARKNESS})')
     ax.set_xticks(x)
     ax.set_xticklabels(strategies)
     ax.set_ylim(0, iters)
-    ax.legend()
+    # ax.legend()
 
     plt.tight_layout()
     plt.show()
@@ -167,8 +186,8 @@ def plot_training_rewards(data_sets):
     })
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    fig.patch.set_facecolor("#040404")
-    ax.set_facecolor('#040404')
+    fig.patch.set_facecolor(DARKNESS) #040404 too dark,# 131313 too bright
+    ax.set_facecolor(DARKNESS)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -187,7 +206,7 @@ def plot_training_rewards(data_sets):
     ax.set_xlabel("Evaluation Episode")
     ax.set_ylabel("Win Rate (%)")
     # ax.set_title("Strategy Performance with Std. Dev. Shading")
-    plt.suptitle("Rollout Reward")
+    plt.suptitle(f"Rollout Reward {DARKNESS}")
     ax.legend()
 
     
