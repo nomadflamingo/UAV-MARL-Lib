@@ -18,6 +18,7 @@ from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
 from PyFlyt.pz_envs.quadx_envs.ma_combat_env import CombatWaypointPursuitEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_dogfight_env import MAQuadXDogfightEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_pursuit_evasion_env import MAQuadXPursuitEvasionEnv
 # pz
 from pettingzoo.test import parallel_api_test
 # SP
@@ -30,6 +31,7 @@ ENV_REGISTRY = {
     "dogfight_QX": MAQuadXDogfightEnv,       # Implementation not finished
     "combat": CombatWaypointPursuitEnv,      # Results Questionable
     "hover": MAQuadXHoverEnv,
+    "pursuit_evasion": MAQuadXPursuitEvasionEnv,
 }
 STRAT_REGISTRY = ['vp',     # Vanilla Play
                   'fp',     # Fictitious Play
@@ -83,17 +85,18 @@ class RandomPolicy:
         return self.action_space.sample(), None
     
 ##### TRAINING FUNCTION #################################################################################
-def train(env=DEFAULT_ENV, 
-          retrain=DEFAULT_RETRAIN, 
+def train(env=DEFAULT_ENV,
+          retrain=DEFAULT_RETRAIN,
           trained_folder=DEFAULT_TRAINED_FOLDER,
-          flight_mode=DEFAULT_FLIGHT_MODE, 
-          output_folder=DEFAULT_OUTPUT_FOLDER, 
+          flight_mode=DEFAULT_FLIGHT_MODE,
+          output_folder=DEFAULT_OUTPUT_FOLDER,
           num_agents=DEFAULT_NUM_AGENTS,
           total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
           update_interval=DEFAULT_UPDATE_INTERVAL,
           n_envs=DEFAULT_NUM_ENVS,
           strategy=DEFAULT_STRAT,
-          policy_type="SAC",):
+          policy_type="SAC",
+          sac_hyperparams: dict | None = None):
     """
     Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
     """
@@ -116,15 +119,20 @@ def train(env=DEFAULT_ENV,
     elif env == 'combat':
         policy = 'MultiInputPolicy'
         ma_env = env_class(render_mode=None, flight_mode=flight_mode)
+    elif env == 'pursuit_evasion':
+        policy = 'MlpPolicy'
+        ma_env = env_class(render_mode=None)
     else:
         print("[ERROR] This environment is not currently suited to train the environment,", env)
         exit()
 
-    # Create File 
+    # Create File
     save_dir = os.path.join(output_folder, env)
     save_dir = os.path.join(output_folder, 'save-'+env+'-'+str(flight_mode)+'-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
+
+    sac_hparams = sac_hyperparams or {}
 
     wb = wandb.init(
         project=f"overnight-{env}-project",
@@ -132,10 +140,11 @@ def train(env=DEFAULT_ENV,
         config={
             "algo": "SAC",
             "env": env,
-            "timesteps": total_timesteps,
-            "update_interval": 1_000,
-            "checkpoint_freq": 1_000,
-            # "learning_rate": 3e-4,
+            "strategy": strategy,
+            "num_agents": num_agents,
+            "total_timesteps": total_timesteps,
+            "update_interval": update_interval,
+            **sac_hparams,
         },
     )
 
@@ -143,11 +152,7 @@ def train(env=DEFAULT_ENV,
     #################################
     ###   BREAK FOR FSP TESTING   ###
     #################################
-    # Initialization FSPTrainer.init
-    sac_kwargs=dict(
-            policy=policy,
-            verbose=1,
-    )
+    sac_kwargs = dict(policy=policy, verbose=1, **sac_hparams)
 
     Trainer = FictitiousPlayEnv(env_class, agent_ids, strategy, save_dir, sac_kwargs)
 
@@ -187,7 +192,7 @@ def train(env=DEFAULT_ENV,
                 name_prefix=f"agent_{agent_id}"
             ),
             RewardLoggingCallback(),
-            MyWandbCallback(),
+            MyWandbCallback(verbose=0),
         ])
 
     #################################

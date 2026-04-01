@@ -4,10 +4,12 @@ import time
 import argparse
 from PyFlyt.pz_envs import MAFixedwingDogfightEnvV2
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_hover_env import MAQuadXHoverEnv
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_pursuit_evasion_env import MAQuadXPursuitEvasionEnv
 
 ENV_REGISTRY = {
     "dogfight_FW": MAFixedwingDogfightEnvV2,
     "hover": MAQuadXHoverEnv,
+    "pursuit_evasion": MAQuadXPursuitEvasionEnv,
 }
 
 if __name__ == "__main__":

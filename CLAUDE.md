@@ -18,7 +18,7 @@ System dependencies for PyBullet GUI: see `Dockerfile` for required OpenGL/mesa 
 ## Running Tests
 
 ```bash
-# All tests (requires display or xvfb for PyBullet rendering)
+# All tests 
 pytest tests/*.py -vvv
 
 # Single test file
@@ -27,9 +27,6 @@ pytest tests/test_gym_envs.py -vvv
 
 # Single test
 pytest tests/test_pz_envs.py::test_parallel_api -vvv
-
-# On headless Linux (CI pattern)
-xvfb-run -s "-screen 0 1024x768x24" pytest --cov tests/*.py -vvv
 ```
 
 ## Linting
