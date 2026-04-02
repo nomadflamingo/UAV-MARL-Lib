@@ -20,9 +20,16 @@ _CONFIG_PATH = Path(__file__).parents[3] / "configs" / "pursuit_evasion.yaml"
 
 
 def _load_config(overrides: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Load YAML defaults and apply any kwarg overrides."""
+    """Load YAML defaults and apply any kwarg overrides.
+
+    env_params nested section is flattened into the top level so the env can
+    read keys directly.  Caller overrides (flat kwargs) are applied last.
+    """
     with open(_CONFIG_PATH) as f:
         cfg = yaml.safe_load(f)
+    # Promote env_params keys to top level
+    env_params = cfg.pop("env_params", {})
+    cfg.update(env_params)
     if overrides:
         cfg.update(overrides)
     return cfg

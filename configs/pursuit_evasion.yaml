@@ -1,71 +1,77 @@
 # ── Pursuit-Evasion Config ────────────────────────────────────────────────────
-# Single source of truth for both the environment and training.
-# Environment reads the keys it needs; training reads the rest.
-
-# ── Environment ───────────────────────────────────────────────────────────────
-
-# Game
-num_pursuers: 2
-num_evaders: 2
-capture_distance: 0.5
-terminate_on_first_capture: true
-
-# Arena (spherical boundary)
-flight_dome_size: 8.0
-boundary_penalty_fraction: 0.8  # grey zone starts at this fraction of dome radius
-
-# Spawning
-spawn_min_radius: 2.0
-spawn_max_radius: 4.0
-spawn_min_height: 1.0
-spawn_max_height: 3.0
-
-# Vision (inf = full visibility)
-vision_distance_pursuer: .inf
-vision_distance_evader: .inf
-
-# Rewards - Pursuer
-capture_reward: 100.0
-team_capture_reward: 50.0
-all_captured_reward: 200.0
-distance_reward_scale: 5.0
-time_penalty: 0.01
-boundary_penalty_scale: 5.0
-collision_penalty: 100.0
-
-# Rewards - Evader
-captured_penalty: 100.0
-teammate_captured_penalty: 30.0
-all_survived_reward: 200.0
-survival_reward_per_step: 0.1
-evader_distance_reward_scale: 0.1
-
-# Simulation
-flight_mode: 0
-max_duration_seconds: 30.0
-angle_representation: euler
-agent_hz: 30
+# Single source of truth for environment and training.
+# Top-level keys are training params; env_params are passed directly to the
+# environment constructor (any keyword the env class accepts).
 
 # ── Training ──────────────────────────────────────────────────────────────────
-
-env: pursuit_evasion
-num_agents: 4           # must match num_pursuers + num_evaders above
+env: pursuit_evasion          # key into ENV_REGISTRY in test_ma_envs.py
+policy: MlpPolicy             # SB3 policy class name
 
 # Strategy: vp/fp/dp (vanilla/fictitious/delta play)
 #           svp/sfp/sdp (self-play variants of the above)
-strategy: sfp
+strategy: dp
 
-total_timesteps: 500000   # total env steps across all agents and iterations
-update_interval: 10000    # steps per agent per FSP iteration
+total_timesteps: 2000000       # total env steps across all agents and iterations
+update_interval: 25000        # steps per agent per FSP iteration
+n_envs: 8
 
 output_folder: results/pe
 
 # SAC hyperparameters
 sac_hyperparams:
   learning_rate: 0.0003
-  buffer_size: 300000
+  buffer_size: 100000
   batch_size: 256
-  learning_starts: 1000
+  learning_starts: 5000
   gamma: 0.99
   tau: 0.005
   ent_coef: auto
+
+# ── Environment Parameters ────────────────────────────────────────────────────
+# Passed as **kwargs directly to the environment constructor.
+# Each env config can define any parameters its constructor accepts.
+
+env_params:
+  # Agents
+  num_pursuers: 2
+  num_evaders: 2
+
+  # Game
+  capture_distance: 2.0
+  terminate_on_first_capture: true
+
+  # Arena (spherical boundary)
+  flight_dome_size: 8.0
+  boundary_penalty_fraction: 0.8  # grey zone starts at this fraction of dome radius
+
+  # Spawning
+  spawn_min_radius: 2.0
+  spawn_max_radius: 4.0
+  spawn_min_height: 1.0
+  spawn_max_height: 3.0
+
+  # Vision (inf = full visibility)
+  vision_distance_pursuer: .inf
+  vision_distance_evader: .inf
+
+  # Rewards - Pursuer
+  capture_reward: 100.0
+  team_capture_reward: 50.0
+  all_captured_reward: 200.0
+  distance_reward_scale: 5.0
+  time_penalty: 0.01
+  boundary_penalty_scale: 5.0
+  collision_penalty: 100.0
+
+  # Rewards - Evader
+  captured_penalty: 100.0
+  teammate_captured_penalty: 30.0
+  all_survived_reward: 200.0
+  survival_reward_per_step: 0.1
+  evader_distance_reward_scale: 0.1
+
+  # Simulation
+  flight_mode: 7
+  max_duration_seconds: 30.0
+  angle_representation: euler
+  agent_hz: 30

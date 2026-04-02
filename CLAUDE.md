@@ -29,6 +29,8 @@ pytest tests/test_gym_envs.py -vvv
 pytest tests/test_pz_envs.py::test_parallel_api -vvv
 ```
 
+**After making any code changes, always run the relevant test file before finishing.** For changes to the pursuit-evasion environment, run `pytest tests/test_pursuit_evasion.py -vvv`.
+
 ## Linting
 
 Pre-commit hooks enforce: black, isort (profile=black), flake8 (max-line-length=456), pydocstyle (google), pyupgrade (py38+), pyright, codespell.

@@ -301,9 +301,8 @@ class FictitiousPlayEnv:
             print(f"[INFO] Initializing new model for agent {agent_id}")
             log_dir = os.path.join(self.save_dir, f"tb_logs/agent_{agent_id}")
 
-            model = SAC(env=train_env,
-                        **self.sac_kwargs,
-                        tensorboard_log=log_dir,)
+            sac_kwargs = {**self.sac_kwargs, "tensorboard_log": log_dir}
+            model = SAC(env=train_env, **sac_kwargs)
 
         # Train
         print("[INFO] Training model...")

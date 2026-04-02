@@ -1,4 +1,5 @@
 import os
+import yaml
 import wandb
 import argparse
 import numpy as np
@@ -25,7 +26,7 @@ from pettingzoo.test import parallel_api_test
 from PyFlyt.marl_wrappers.selfplay import MASelfPlayEnv, FictitiousPlayEnv #, SelfPlayEnv
 
 
-# Global Defaults
+# Environment registry — maps config "env" keys to PettingZoo env classes
 ENV_REGISTRY = {
     "dogfight_FW": MAFixedwingDogfightEnvV2,
     "dogfight_QX": MAQuadXDogfightEnv,       # Implementation not finished
@@ -33,24 +34,13 @@ ENV_REGISTRY = {
     "hover": MAQuadXHoverEnv,
     "pursuit_evasion": MAQuadXPursuitEvasionEnv,
 }
-STRAT_REGISTRY = ['vp',     # Vanilla Play
-                  'fp',     # Fictitious Play
-                  'dp',     # Delta-Uniform Play
-                  'svp',    # Vanilla Self-Play
-                  'sfp',    # Fictitious Self-Play
-                  'sdp']    # Delta-Uniform Self-Play
 
-DEFAULT_ENV = 'dogfight_FW'
-DEFAULT_RETRAIN = False
-DEFAULT_TRAINED_FOLDER = 'name'
-DEFAULT_FLIGHT_MODE = 0
-# DEFAULT_OUTPUT_FOLDER = 'results/ma'
+# Fallback defaults (used when a config key is absent)
 DEFAULT_OUTPUT_FOLDER = 'junk'
-DEFAULT_NUM_AGENTS = 2
 DEFAULT_TOTAL_TIMESTEPS = int(5e3)
 DEFAULT_UPDATE_INTERVAL = int(1e3)
 DEFAULT_NUM_ENVS = 8
-DEFAULT_STRAT = STRAT_REGISTRY[5]
+DEFAULT_STRAT = 'sdp'
 
 class MyWandbCallback(WandbCallback):
     def _on_step(self) -> bool:
@@ -69,10 +59,17 @@ class RewardLoggingCallback(BaseCallback):
 
     def _on_step(self) -> bool:
         infos = self.locals["infos"]
-        for info in infos:
-            if "reward_components" in info:
-                for key, value in info["reward_components"].items():
-                    self.logger.record(f"reward_components/{key}", value)
+        
+        # Grab keys from the first env (assuming all envs have the same keys)
+        if "reward_components" in infos[0]:
+            for key in infos[0]["reward_components"].keys():
+                # Average the component across all parallel envs
+                avg_val = np.mean([
+                    info["reward_components"][key] 
+                    for info in infos if "reward_components" in info
+                ])
+                self.logger.record(f"reward_components/{key}", avg_val)
+                
         return True
 
 class RandomPolicy:
@@ -85,43 +82,35 @@ class RandomPolicy:
         return self.action_space.sample(), None
     
 ##### TRAINING FUNCTION #################################################################################
-def train(env=DEFAULT_ENV,
-          retrain=DEFAULT_RETRAIN,
-          trained_folder=DEFAULT_TRAINED_FOLDER,
-          flight_mode=DEFAULT_FLIGHT_MODE,
-          output_folder=DEFAULT_OUTPUT_FOLDER,
-          num_agents=DEFAULT_NUM_AGENTS,
-          total_timesteps=DEFAULT_TOTAL_TIMESTEPS,
-          update_interval=DEFAULT_UPDATE_INTERVAL,
-          n_envs=DEFAULT_NUM_ENVS,
-          strategy=DEFAULT_STRAT,
-          policy_type="SAC",
-          sac_hyperparams: dict | None = None):
+def train(config: dict):
     """
-    Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
+    Modular training routine driven by a YAML config dict.
+
+    Required top-level keys: env, strategy, total_timesteps, update_interval.
+    Optional: policy, n_envs, output_folder, sac_hyperparams, env_params.
+    env_params are forwarded as **kwargs to the environment constructor.
     """
-    print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment using a \'{strategy}\' method.")
+    env_name        = config["env"]
+    strategy        = config.get("strategy", DEFAULT_STRAT)
+    total_timesteps = config.get("total_timesteps", DEFAULT_TOTAL_TIMESTEPS)
+    update_interval = config.get("update_interval", DEFAULT_UPDATE_INTERVAL)
+    n_envs          = config.get("n_envs", DEFAULT_NUM_ENVS)
+    output_folder   = config.get("output_folder", DEFAULT_OUTPUT_FOLDER)
+    policy          = config.get("policy", "MlpPolicy")
+    sac_hyperparams = config.get("sac_hyperparams") or {}
+    env_params      = config.get("env_params") or {}
+
+    print(f"\n\n[INFO] Beginning training agents in the '{env_name}' environment using a '{strategy}' method.")
 
     #################################
     ### INITIATE THE ENVIRONMENTS ###
     #################################
-    env_class = ENV_REGISTRY[env]
-    if env == 'hover':
-        policy = 'MlpPolicy'
-        target_reward = 1600
-        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
-    elif env == 'dogfight_FW':
-        policy = 'MlpPolicy'
-        ma_env = env_class(render_mode=None)
-    elif env == 'combat':
-        policy = 'MultiInputPolicy'
-        ma_env = env_class(render_mode=None, flight_mode=flight_mode)
-    elif env == 'pursuit_evasion':
-        policy = 'MlpPolicy'
-        ma_env = env_class(render_mode=None)
-    else:
-        print("[ERROR] This environment is not currently suited to train the environment,", env)
-        exit()
+    if env_name not in ENV_REGISTRY:
+        print(f"[ERROR] Unknown environment '{env_name}'. Available: {list(ENV_REGISTRY.keys())}")
+        exit(1)
+
+    env_class = ENV_REGISTRY[env_name]
+    ma_env = env_class(render_mode=None, **env_params)
 
     # Use the env's actual agent count — overrides --num_agents
     num_agents = ma_env.num_possible_agents
@@ -129,24 +118,22 @@ def train(env=DEFAULT_ENV,
     agent_names = [f"uav_{i}" for i in range(num_agents)]
 
     # Create File
-    save_dir = os.path.join(output_folder, env)
-    save_dir = os.path.join(output_folder, 'save-'+env+'-'+str(flight_mode)+'-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
+    save_dir = os.path.join(output_folder, 'save-'+env_name+'-'+datetime.now().strftime("%m.%d.%Y_%H.%M"))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir+'/')
 
-    sac_hparams = sac_hyperparams or {}
-
     wb = wandb.init(
-        project=f"overnight-{env}-project",
-        name=f"sac-{env}-{strategy}-{datetime.now().strftime('%m.%d.%Y_%H.%M')}",
+        project=f"overnight-{env_name}-project",
+        name=f"sac-{env_name}-{strategy}-{datetime.now().strftime('%m.%d.%Y_%H.%M')}",
+        sync_tensorboard=True,
         config={
             "algo": "SAC",
-            "env": env,
+            "env": env_name,
             "strategy": strategy,
             "num_agents": num_agents,
             "total_timesteps": total_timesteps,
             "update_interval": update_interval,
-            **sac_hparams,
+            **sac_hyperparams,
         },
     )
 
@@ -154,7 +141,12 @@ def train(env=DEFAULT_ENV,
     #################################
     ###   BREAK FOR FSP TESTING   ###
     #################################
-    sac_kwargs = dict(policy=policy, verbose=1, **sac_hparams)
+    sac_kwargs = dict(
+        policy=policy,
+        verbose=1,
+        tensorboard_log=os.path.join(save_dir, "tb_logs"),
+        **sac_hyperparams
+    )
 
     Trainer = FictitiousPlayEnv(env_class, agent_ids, strategy, save_dir, sac_kwargs)
 
@@ -252,29 +244,31 @@ def train(env=DEFAULT_ENV,
     return
 
 
-def str2bool(val):
-    if isinstance(val, bool):
-        return val
-    if val.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif val.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    raise argparse.ArgumentTypeError("Boolean value expected.")
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Single agent reinforcement learning in PyFlyt Gymnasium Environments")
-    parser.add_argument('--env',             default=DEFAULT_ENV,             type=str,      help='Single agent gymnasium environment to train (default: hover).')
-    parser.add_argument('--retrain',         default=DEFAULT_RETRAIN,         type=str2bool, help='Retrain existing model (default: False).')
-    parser.add_argument('--trained_folder',  default=DEFAULT_TRAINED_FOLDER,  type=str,      help='Floder inside output_folder containing model to retrain (default: name)')
-    parser.add_argument('--flight_mode',     default=DEFAULT_FLIGHT_MODE,     type=int,      help='Flight mode (0=default).')
-    parser.add_argument('--output_folder',   default=DEFAULT_OUTPUT_FOLDER,   type=str,      help='Folder where to save logs (default: "results")', metavar='')
-    parser.add_argument('--num_agents',      default=DEFAULT_NUM_AGENTS,      type=int,      help=f'Number of agents in environment (default: {DEFAULT_NUM_AGENTS})')
-    parser.add_argument('--total_timesteps', default=DEFAULT_TOTAL_TIMESTEPS, type=int,      help=f'Number of iterations to train agents over (default: {DEFAULT_TOTAL_TIMESTEPS})')
-    parser.add_argument('--update_interval', default=DEFAULT_UPDATE_INTERVAL, type=int,      help=f'Intervals for training breaks (default: {DEFAULT_UPDATE_INTERVAL})')
-    parser.add_argument('--n_envs',          default=DEFAULT_NUM_ENVS,        type=int,      help=f'Number of environments in vectorized training (default: {DEFAULT_NUM_ENVS})')
+    parser = argparse.ArgumentParser(description="Multi-agent UAV training in PyFlyt environments")
+    parser.add_argument('--config', required=True, type=str,
+                        help='Path to YAML config file (e.g. configs/pursuit_evasion.yaml)')
+    # Optional CLI overrides — these take precedence over config file values when provided
+    parser.add_argument('--total_timesteps', default=None, type=int,
+                        help='Override total_timesteps from config')
+    parser.add_argument('--update_interval', default=None, type=int,
+                        help='Override update_interval from config')
+    parser.add_argument('--output_folder',   default=None, type=str,
+                        help='Override output_folder from config')
+    parser.add_argument('--strategy',        default=None, type=str,
+                        help='Override strategy from config')
     ARGS = parser.parse_args()
 
-    train(**vars(ARGS))
+    with open(ARGS.config, 'r') as f:
+        config = yaml.safe_load(f)
+
+    # Apply CLI overrides
+    for key in ('total_timesteps', 'update_interval', 'output_folder', 'strategy'):
+        val = getattr(ARGS, key)
+        if val is not None:
+            config[key] = val
+
+    train(config)
     print("[INFO] Done.")
 
     
