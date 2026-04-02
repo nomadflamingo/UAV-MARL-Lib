@@ -199,18 +199,18 @@ class FictitiousPlayEnv:
         self.policy_dist = {i: [1.0] for i in agent_ids}
         self.strategies = {i: strategy for i in agent_ids} # Distribuition Update Strategy
 
-    def make_env(self, ma_env, train_agent_id: int, seed, n_envs: int):
+    def make_env(self, ma_env, train_agent_id: int, seed, n_envs: int, opp_policies=None):
         def _init():
             print(f"\n[INFO] Evaluation Env for agent_{train_agent_id}: {ma_env}")
 
             ma_env.reset()
 
-            opp_policies = {
+            policies = opp_policies if opp_policies is not None else {
                 i: RandomPolicy(ma_env.action_space(i))
                 for i in range(ma_env.num_possible_agents) if i != train_agent_id
             }
 
-            env = MASelfPlayEnv(ma_env, train_agent_id, opp_policies)
+            env = MASelfPlayEnv(ma_env, train_agent_id, policies)
             env.reset(seed=seed)
             return env
         return _init
@@ -283,10 +283,9 @@ class FictitiousPlayEnv:
                     for opp_id in opp_ids
                 }
 
-        # train_env = MASelfPlayEnv(self.ma_env, agent_id, opp_policies)
         train_env = VecMonitor(
             DummyVecEnv([
-                self.make_env(self.ma_env, agent_id, seed=None, n_envs=1)
+                self.make_env(self.ma_env, agent_id, seed=None, n_envs=1, opp_policies=opp_policies)
             ])
         )
 
