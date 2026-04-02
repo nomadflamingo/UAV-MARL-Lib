@@ -101,9 +101,6 @@ def train(env=DEFAULT_ENV,
     Modular training routine for a choice of "ENV_REGISTRY" and "STRAT_REGISTRY".
     """
     print(f"\n\n[INFO] Beginning {'re' if retrain else ''}training agents in the \'{env}\' environment using a \'{strategy}\' method.")
-    
-    agent_ids = list(range(num_agents))
-    agent_names = [f"uav_{i}" for i in range(num_agents)]
 
     #################################
     ### INITIATE THE ENVIRONMENTS ###
@@ -125,6 +122,11 @@ def train(env=DEFAULT_ENV,
     else:
         print("[ERROR] This environment is not currently suited to train the environment,", env)
         exit()
+
+    # Use the env's actual agent count — overrides --num_agents
+    num_agents = ma_env.num_possible_agents
+    agent_ids = list(range(num_agents))
+    agent_names = [f"uav_{i}" for i in range(num_agents)]
 
     # Create File
     save_dir = os.path.join(output_folder, env)
@@ -237,7 +239,9 @@ def train(env=DEFAULT_ENV,
             #     env.ma_env.render_trajectory(os.path.join(save_dir, f"logs_{DEFAULT_ENV}/trajectories_hover/agent{agent_id}_{it:04d}.png"))
 
     ### SAVE FINAL MODELS ###
-    for agent_id in range(Trainer.ma_env.num_possible_agents):
+    for agent_id in agent_ids:
+        if agent_id not in Trainer.current_br:
+            continue
         file = os.path.join(save_dir, f"final_agent_{agent_id}_model")
         Trainer.current_br[agent_id].save(file)
         wb.save(file)
