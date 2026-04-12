@@ -1,0 +1,158 @@
+{"time":"2026-04-01T18:22:56.24828447-04:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-01T18:22:56.249753104-04:00","level":"INFO","msg":"stream: starting","core version":"0.25.1"}
+{"time":"2026-04-01T18:22:58.242814333-04:00","level":"INFO","msg":"stream: created new stream","id":"u1d1yt38"}
+{"time":"2026-04-01T18:22:58.24300716-04:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-01T18:22:58.243239913-04:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-01T18:22:58.243315807-04:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-01T18:22:58.243304696-04:00","level":"INFO","msg":"writer: started","stream_id":"u1d1yt38"}
+{"time":"2026-04-01T18:22:59.111426121-04:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":2}
+{"time":"2026-04-01T18:22:59.367664498-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:23:14.111761715-04:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":0,"events_lines":2,"console_offset":1,"console_lines":47,"uploaded_len":2}
+{"time":"2026-04-01T18:23:14.421125672-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:23:17.785119913-04:00","level":"WARN","msg":"tensorboard: no root directory","error":"timed out after 10s"}
+{"time":"2026-04-01T18:23:17.78518117-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_1\")","namespace":""}
+{"time":"2026-04-01T18:23:17.785405717-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_1/events.out.tfevents.1775082187.vldmr3.310044.0","runPath":"junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_1/events.out.tfevents.1775082187.vldmr3.310044.0"}
+{"time":"2026-04-01T18:23:29.112171978-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":0,"history_lines":121,"events_offset":2,"events_lines":2,"console_offset":40,"console_lines":112}
+{"time":"2026-04-01T18:23:29.575916291-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:23:30.05267334-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_1\")","namespace":"agent_1/fsp_agent1_1"}
+{"time":"2026-04-01T18:23:35.053671899-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_1/events.out.tfevents.1775082210.vldmr3.310044.1","runPath":"agent_1/fsp_agent1_1/events.out.tfevents.1775082210.vldmr3.310044.1"}
+{"time":"2026-04-01T18:23:40.054816306-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":954}
+{"time":"2026-04-01T18:23:40.055158777-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":1}
+{"time":"2026-04-01T18:23:44.111906479-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":121,"history_lines":66,"events_offset":4,"events_lines":2,"console_offset":139,"console_lines":120}
+{"time":"2026-04-01T18:23:44.423956353-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:23:51.655640057-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_1\")","namespace":"agent_2/fsp_agent2_1"}
+{"time":"2026-04-01T18:23:56.656981632-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_1/events.out.tfevents.1775082231.vldmr3.310044.2","runPath":"agent_2/fsp_agent2_1/events.out.tfevents.1775082231.vldmr3.310044.2"}
+{"time":"2026-04-01T18:23:56.657460964-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":1403}
+{"time":"2026-04-01T18:23:56.657668879-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":15}
+{"time":"2026-04-01T18:23:59.111724052-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":187,"history_lines":83,"events_offset":6,"events_lines":2,"console_offset":251,"console_lines":93}
+{"time":"2026-04-01T18:23:59.377357454-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:24:01.659483983-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":1538}
+{"time":"2026-04-01T18:24:01.660301608-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":25}
+{"time":"2026-04-01T18:24:11.701662889-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_1\")","namespace":"agent_3/fsp_agent3_1"}
+{"time":"2026-04-01T18:24:14.112115664-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":270,"history_lines":84,"events_offset":8,"events_lines":2,"console_offset":336,"console_lines":102}
+{"time":"2026-04-01T18:24:14.430093432-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:24:16.702643543-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_1/events.out.tfevents.1775082251.vldmr3.310044.3","runPath":"agent_3/fsp_agent3_1/events.out.tfevents.1775082251.vldmr3.310044.3"}
+{"time":"2026-04-01T18:24:16.703543775-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":1942}
+{"time":"2026-04-01T18:24:16.704524419-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":7}
+{"time":"2026-04-01T18:24:29.111978888-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":354,"history_lines":72,"events_offset":10,"events_lines":2,"console_offset":429,"console_lines":2}
+{"time":"2026-04-01T18:24:29.685415831-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:24:35.224271352-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_2\")","namespace":"agent_0/fsp_agent0_2"}
+{"time":"2026-04-01T18:24:40.225436879-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_2/events.out.tfevents.1775082275.vldmr3.310044.4","runPath":"agent_0/fsp_agent0_2/events.out.tfevents.1775082275.vldmr3.310044.4"}
+{"time":"2026-04-01T18:24:44.112408043-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":426,"history_lines":66,"events_offset":12,"events_lines":2,"console_offset":432,"console_lines":186}
+{"time":"2026-04-01T18:24:44.328653649-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:24:55.229953704-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":2884}
+{"time":"2026-04-01T18:24:55.230354586-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":3}
+{"time":"2026-04-01T18:24:58.470078993-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_2\")","namespace":"agent_1/fsp_agent1_2"}
+{"time":"2026-04-01T18:24:59.111990751-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":492,"history_lines":74,"events_offset":14,"events_lines":2,"console_offset":610,"console_lines":94}
+{"time":"2026-04-01T18:24:59.382173933-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:25:03.470730462-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_2/events.out.tfevents.1775082298.vldmr3.310044.5","runPath":"agent_1/fsp_agent1_2/events.out.tfevents.1775082298.vldmr3.310044.5"}
+{"time":"2026-04-01T18:25:14.112213773-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":566,"history_lines":96,"events_offset":16,"events_lines":2,"console_offset":694,"console_lines":9}
+{"time":"2026-04-01T18:25:14.63993837-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:25:20.903327897-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_2\")","namespace":"agent_2/fsp_agent2_2"}
+{"time":"2026-04-01T18:25:23.476791926-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3610}
+{"time":"2026-04-01T18:25:23.477147291-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":20}
+{"time":"2026-04-01T18:25:25.904509228-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_2/events.out.tfevents.1775082320.vldmr3.310044.6","runPath":"agent_2/fsp_agent2_2/events.out.tfevents.1775082320.vldmr3.310044.6"}
+{"time":"2026-04-01T18:25:29.112372282-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":662,"history_lines":60,"events_offset":18,"events_lines":2,"console_offset":704,"console_lines":188}
+{"time":"2026-04-01T18:25:29.590588527-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:25:30.905661409-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3784}
+{"time":"2026-04-01T18:25:30.907081448-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":58}
+{"time":"2026-04-01T18:25:35.908263182-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":3915}
+{"time":"2026-04-01T18:25:35.908692768-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":27}
+{"time":"2026-04-01T18:25:41.282144632-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_2\")","namespace":"agent_3/fsp_agent3_2"}
+{"time":"2026-04-01T18:25:44.111913378-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":722,"history_lines":82,"events_offset":20,"events_lines":2,"console_offset":884,"console_lines":84}
+{"time":"2026-04-01T18:25:44.336677411-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:25:46.283150718-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_2/events.out.tfevents.1775082341.vldmr3.310044.7","runPath":"agent_3/fsp_agent3_2/events.out.tfevents.1775082341.vldmr3.310044.7"}
+{"time":"2026-04-01T18:25:59.112393221-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":804,"history_lines":80,"events_offset":22,"events_lines":2,"console_offset":959,"console_lines":3}
+{"time":"2026-04-01T18:25:59.900898025-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:26:02.626254821-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_3\")","namespace":"agent_0/fsp_agent0_3"}
+{"time":"2026-04-01T18:26:07.6271125-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_3/events.out.tfevents.1775082362.vldmr3.310044.8","runPath":"agent_0/fsp_agent0_3/events.out.tfevents.1775082362.vldmr3.310044.8"}
+{"time":"2026-04-01T18:26:14.11310243-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":884,"history_lines":77,"events_offset":24,"events_lines":2,"console_offset":963,"console_lines":195}
+{"time":"2026-04-01T18:26:14.340143691-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:26:22.631687606-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":5122}
+{"time":"2026-04-01T18:26:22.631818795-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":1}
+{"time":"2026-04-01T18:26:23.291681127-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_3\")","namespace":"agent_1/fsp_agent1_3"}
+{"time":"2026-04-01T18:26:28.292373754-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_3/events.out.tfevents.1775082383.vldmr3.310044.9","runPath":"agent_1/fsp_agent1_3/events.out.tfevents.1775082383.vldmr3.310044.9"}
+{"time":"2026-04-01T18:26:29.111801556-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":961,"history_lines":72,"events_offset":26,"events_lines":2,"console_offset":1150,"console_lines":96}
+{"time":"2026-04-01T18:26:29.495956171-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:26:43.297270454-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":5647}
+{"time":"2026-04-01T18:26:43.307975486-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":8}
+{"time":"2026-04-01T18:26:44.112525926-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1033,"history_lines":76,"events_offset":28,"events_lines":2,"console_offset":1238,"console_lines":98}
+{"time":"2026-04-01T18:26:44.128878117-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_3\")","namespace":"agent_2/fsp_agent2_3"}
+{"time":"2026-04-01T18:26:44.343352754-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:26:49.129442965-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_3/events.out.tfevents.1775082404.vldmr3.310044.10","runPath":"agent_2/fsp_agent2_3/events.out.tfevents.1775082404.vldmr3.310044.10"}
+{"time":"2026-04-01T18:26:59.112214896-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1109,"history_lines":62,"events_offset":30,"events_lines":2,"console_offset":1327,"console_lines":96}
+{"time":"2026-04-01T18:26:59.498763522-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:27:05.940938254-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_3\")","namespace":"agent_3/fsp_agent3_3"}
+{"time":"2026-04-01T18:27:10.941766994-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_3/events.out.tfevents.1775082425.vldmr3.310044.11","runPath":"agent_3/fsp_agent3_3/events.out.tfevents.1775082425.vldmr3.310044.11"}
+{"time":"2026-04-01T18:27:14.111647861-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1171,"history_lines":73,"events_offset":32,"events_lines":2,"console_offset":1415,"console_lines":92}
+{"time":"2026-04-01T18:27:14.552261783-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:27:27.078125596-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_4\")","namespace":"agent_0/fsp_agent0_4"}
+{"time":"2026-04-01T18:27:29.111799617-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1244,"history_lines":81,"events_offset":34,"events_lines":2,"console_offset":1499,"console_lines":108}
+{"time":"2026-04-01T18:27:29.501245114-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:27:32.079059547-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_4/events.out.tfevents.1775082447.vldmr3.310044.12","runPath":"agent_0/fsp_agent0_4/events.out.tfevents.1775082447.vldmr3.310044.12"}
+{"time":"2026-04-01T18:27:37.081691893-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7004}
+{"time":"2026-04-01T18:27:37.082297113-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":60}
+{"time":"2026-04-01T18:27:42.082713759-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7137}
+{"time":"2026-04-01T18:27:42.083206354-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":27}
+{"time":"2026-04-01T18:27:44.111791514-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1325,"history_lines":81,"events_offset":36,"events_lines":2,"console_offset":1599,"console_lines":94}
+{"time":"2026-04-01T18:27:44.554899483-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:27:47.136967844-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_4\")","namespace":"agent_1/fsp_agent1_4"}
+{"time":"2026-04-01T18:27:52.13829399-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_4/events.out.tfevents.1775082467.vldmr3.310044.13","runPath":"agent_1/fsp_agent1_4/events.out.tfevents.1775082467.vldmr3.310044.13"}
+{"time":"2026-04-01T18:27:59.112312842-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1406,"history_lines":80,"events_offset":38,"events_lines":2,"console_offset":1685,"console_lines":103}
+{"time":"2026-04-01T18:27:59.812421866-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:28:02.141828541-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7676}
+{"time":"2026-04-01T18:28:02.142463838-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":10}
+{"time":"2026-04-01T18:28:06.960620722-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_4\")","namespace":"agent_2/fsp_agent2_4"}
+{"time":"2026-04-01T18:28:07.143386052-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7802}
+{"time":"2026-04-01T18:28:07.144094488-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":60}
+{"time":"2026-04-01T18:28:11.961919004-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_4/events.out.tfevents.1775082486.vldmr3.310044.14","runPath":"agent_2/fsp_agent2_4/events.out.tfevents.1775082486.vldmr3.310044.14"}
+{"time":"2026-04-01T18:28:11.962209165-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":7945}
+{"time":"2026-04-01T18:28:11.962635996-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":30}
+{"time":"2026-04-01T18:28:14.112332209-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1486,"history_lines":76,"events_offset":40,"events_lines":2,"console_offset":1780,"console_lines":111}
+{"time":"2026-04-01T18:28:14.455426915-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:28:21.964003465-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":8202}
+{"time":"2026-04-01T18:28:21.964184318-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":1}
+{"time":"2026-04-01T18:28:27.476140547-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_4\")","namespace":"agent_3/fsp_agent3_4"}
+{"time":"2026-04-01T18:28:29.112335847-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1562,"history_lines":89,"events_offset":42,"events_lines":2,"console_offset":1883,"console_lines":106}
+{"time":"2026-04-01T18:28:29.405832612-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:28:32.477397853-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_4/events.out.tfevents.1775082507.vldmr3.310044.15","runPath":"agent_3/fsp_agent3_4/events.out.tfevents.1775082507.vldmr3.310044.15"}
+{"time":"2026-04-01T18:28:42.480852648-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":8744}
+{"time":"2026-04-01T18:28:42.481329453-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":25}
+{"time":"2026-04-01T18:28:44.112247769-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1651,"history_lines":76,"events_offset":44,"events_lines":2,"console_offset":1980,"console_lines":3}
+{"time":"2026-04-01T18:28:44.458872715-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:28:49.270180173-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_5\")","namespace":"agent_0/fsp_agent0_5"}
+{"time":"2026-04-01T18:28:54.271672426-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_0/fsp_agent0_5/events.out.tfevents.1775082529.vldmr3.310044.16","runPath":"agent_0/fsp_agent0_5/events.out.tfevents.1775082529.vldmr3.310044.16"}
+{"time":"2026-04-01T18:28:59.112000128-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1727,"history_lines":53,"events_offset":46,"events_lines":2,"console_offset":1984,"console_lines":168}
+{"time":"2026-04-01T18:28:59.61407814-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:29:04.274984878-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":9237}
+{"time":"2026-04-01T18:29:04.275432318-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":33}
+{"time":"2026-04-01T18:29:12.253031515-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_5\")","namespace":"agent_1/fsp_agent1_5"}
+{"time":"2026-04-01T18:29:14.112040613-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1780,"history_lines":78,"events_offset":48,"events_lines":2,"console_offset":2144,"console_lines":90}
+{"time":"2026-04-01T18:29:14.360505561-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:29:17.254104188-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_1/fsp_agent1_5/events.out.tfevents.1775082552.vldmr3.310044.17","runPath":"agent_1/fsp_agent1_5/events.out.tfevents.1775082552.vldmr3.310044.17"}
+{"time":"2026-04-01T18:29:22.25517355-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":9668}
+{"time":"2026-04-01T18:29:22.255653261-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":30}
+{"time":"2026-04-01T18:29:29.111936333-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1858,"history_lines":80,"events_offset":50,"events_lines":2,"console_offset":2225,"console_lines":3}
+{"time":"2026-04-01T18:29:29.515216501-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:29:32.257577923-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":9908}
+{"time":"2026-04-01T18:29:32.258095866-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":33}
+{"time":"2026-04-01T18:29:34.904716101-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_5\")","namespace":"agent_2/fsp_agent2_5"}
+{"time":"2026-04-01T18:29:39.905918068-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_2/fsp_agent2_5/events.out.tfevents.1775082574.vldmr3.310044.18","runPath":"agent_2/fsp_agent2_5/events.out.tfevents.1775082574.vldmr3.310044.18"}
+{"time":"2026-04-01T18:29:44.11194428-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1938,"history_lines":55,"events_offset":52,"events_lines":2,"console_offset":2229,"console_lines":170}
+{"time":"2026-04-01T18:29:44.876298332-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:29:57.745284572-04:00","level":"INFO","msg":"tensorboard: tracking new log directory","rootDir":{},"logDir":"LocalOrCloudPath(LocalPath=\"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_5\")","namespace":"agent_3/fsp_agent3_5"}
+{"time":"2026-04-01T18:29:59.112161918-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":1993,"history_lines":78,"events_offset":54,"events_lines":2,"console_offset":2391,"console_lines":86}
+{"time":"2026-04-01T18:29:59.519323991-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:30:02.746205093-04:00","level":"INFO","msg":"tensorboard: saving file","fileLocation":"/home/volodymyr/work/UAV-MARL-Lib/junk/save-pursuit_evasion-0-04.01.2026_18.22/tb_logs/agent_3/fsp_agent3_5/events.out.tfevents.1775082597.vldmr3.310044.19","runPath":"agent_3/fsp_agent3_5/events.out.tfevents.1775082597.vldmr3.310044.19"}
+{"time":"2026-04-01T18:30:07.747875275-04:00","level":"INFO","msg":"flowcontrol: backed up, offloading to disk","recordNumber":10749}
+{"time":"2026-04-01T18:30:07.74847817-04:00","level":"INFO","msg":"flowcontrol: unblocked","totalOffloaded":59}
+{"time":"2026-04-01T18:30:14.112392806-04:00","level":"INFO","msg":"filestream: sending request","total_files":4,"history_offset":2071,"history_lines":77,"events_offset":56,"events_lines":2,"console_offset":2468,"console_lines":4}
+{"time":"2026-04-01T18:30:14.572256823-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:30:18.254522101-04:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-04-01T18:30:18.255078808-04:00","level":"INFO","msg":"filestream: sending request","total_files":3,"history_offset":2148,"history_lines":31,"console_offset":2473,"console_lines":115,"uploaded_len":23,"complete":true,"exit_code":0}
+{"time":"2026-04-01T18:30:18.463919025-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:30:18.465152748-04:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2026-04-01T18:30:18.468644008-04:00","level":"INFO","msg":"stream: closing"}
+{"time":"2026-04-01T18:30:18.468656331-04:00","level":"INFO","msg":"handler: closed"}
+{"time":"2026-04-01T18:30:18.468693842-04:00","level":"INFO","msg":"sender: closed"}
+{"time":"2026-04-01T18:30:18.468699523-04:00","level":"INFO","msg":"stream: closed"}

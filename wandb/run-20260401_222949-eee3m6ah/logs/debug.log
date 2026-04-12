@@ -1,0 +1,201 @@
+2026-04-01 22:29:49,244 INFO    MainThread:467280 [wandb_setup.py:_flush():81] Current SDK version is 0.25.1
+2026-04-01 22:29:49,244 INFO    MainThread:467280 [wandb_setup.py:_flush():81] Configure stats pid to 467280
+2026-04-01 22:29:49,244 INFO    MainThread:467280 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-01 22:29:49,245 INFO    MainThread:467280 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260401_222949-eee3m6ah/logs/debug.log
+2026-04-01 22:29:49,245 INFO    MainThread:467280 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260401_222949-eee3m6ah/logs/debug-internal.log
+2026-04-01 22:29:49,249 INFO    MainThread:467280 [wandb_init.py:init():844] calling init triggers
+2026-04-01 22:29:49,249 INFO    MainThread:467280 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'algo': 'SAC', 'env': 'pursuit_evasion', 'strategy': 'dp', 'num_agents': 4, 'total_timesteps': 2000000, 'update_interval': 25000, 'learning_rate': 0.0003, 'buffer_size': 100000, 'batch_size': 256, 'learning_starts': 5000, 'gamma': 0.99, 'tau': 0.005, 'ent_coef': 'auto', '_wandb': {}}
+2026-04-01 22:29:49,249 INFO    MainThread:467280 [wandb_init.py:init():892] starting backend
+2026-04-01 22:29:49,519 INFO    MainThread:467280 [wandb_init.py:init():895] sending inform_init request
+2026-04-01 22:29:49,525 INFO    MainThread:467280 [wandb_init.py:init():903] backend started and connected
+2026-04-01 22:29:49,529 INFO    MainThread:467280 [wandb_init.py:init():973] updated telemetry
+2026-04-01 22:29:49,538 INFO    MainThread:467280 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-04-01 22:29:51,905 INFO    MainThread:467280 [wandb_init.py:init():1042] starting run threads in backend
+2026-04-01 22:29:52,137 INFO    MainThread:467280 [wandb_run.py:_console_start():2524] atexit reg
+2026-04-01 22:29:52,137 INFO    MainThread:467280 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-04-01 22:29:52,137 INFO    MainThread:467280 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-04-01 22:29:52,137 INFO    MainThread:467280 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-04-01 22:29:52,147 INFO    MainThread:467280 [wandb_init.py:init():1082] run started, returning control to user process
+2026-04-01 22:30:06,906 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_1, True
+2026-04-01 22:30:06,941 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {'policy_class': "<class 'stable_baselines3.sac.policies.SACPolicy'>", 'device': 'cuda', 'verbose': 1, 'policy_kwargs': "{'use_sde': False}", 'num_timesteps': 0, '_total_timesteps': 25000, '_num_timesteps_at_start': 0, 'seed': 'None', 'action_noise': 'None', 'start_time': 1775097006777715197, 'tensorboard_log': 'results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0', '_last_obs': '[[ 0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00\n  -0.00000000e+00 -2.57775277e+00  0.00000000e+00  0.00000000e+00\n  -1.32592500e-01  2.87277495e+00  1.81648915e+00  2.07836002e+00\n   3.11023719e-01  3.11023719e-01  3.11023719e-01  3.11023719e-01\n   0.00000000e+00  0.00000000e+00  0.00000000e+00  0.00000000e+00\n   5.54992529e-01 -1.15236388e+00  4.12102625e-01  0.00000000e+00\n   0.00000000e+00 -3.27797709e-03  1.00000000e+00 -2.82345287e+00\n  -5.80598928e+00  7.07702892e-01  0.00000000e+00  0.00000000e+00\n  -6.78404294e-03  1.00000000e+00 -6.48804603e+00 -9.40778838e-01\n  -9.14355093e-01  0.00000000e+00  0.00000000e+00  7.19201615e-03\n   4.97996754e-01]]', '_last_episode_starts': '[ True]', '_last_original_obs': 'None', '_episode_num': 0, 'use_sde': 'False', 'sde_sample_freq': -1, '_current_progress_remaining': 1.0, '_stats_window_size': 100, 'ep_info_buffer': 'deque([], maxlen=100)', 'ep_success_buffer': 'deque([], maxlen=100)', '_n_updates': 0, '_custom_logger': 'False', '_vec_normalize_env': 'None', 'observation_space': 'Box(-inf, inf, (41,), float64)', 'action_space': 'Box([-3.14159265 -3.14159265 -3.14159265  0.        ], [3.14159265 3.14159265 3.14159265 0.8       ], (4,), float64)', 'n_envs': 1, 'gradient_steps': 1, 'optimize_memory_usage': 'False', 'replay_buffer': '<stable_baselines3.common.buffers.ReplayBuffer object at 0x7178c1dca950>', 'replay_buffer_class': "<class 'stable_baselines3.common.buffers.ReplayBuffer'>", 'replay_buffer_kwargs': '{}', 'n_steps': 1, 'train_freq': "TrainFreq(frequency=1, unit=<TrainFrequencyUnit.STEP: 'step'>)", 'use_sde_at_warmup': 'False', 'target_entropy': -4.0, 'log_ent_coef': "tensor([0.], device='cuda:0', requires_grad=True)", 'target_update_interval': 1, 'ent_coef_optimizer': 'Adam (\nParameter Group 0\n    amsgrad: False\n    betas: (0.9, 0.999)\n    capturable: False\n    decoupled_weight_decay: False\n    differentiable: False\n    eps: 1e-08\n    foreach: None\n    fused: None\n    lr: 0.0003\n    maximize: False\n    weight_decay: 0\n)', 'lr_schedule': 'FloatSchedule(ConstantSchedule(val=0.0003))', 'policy': 'SACPolicy(\n  (actor): Actor(\n    (features_extractor): FlattenExtractor(\n      (flatten): Flatten(start_dim=1, end_dim=-1)\n    )\n    (latent_pi): Sequential(\n      (0): Linear(in_features=41, out_features=256, bias=True)\n      (1): ReLU()\n      (2): Linear(in_features=256, out_features=256, bias=True)\n      (3): ReLU()\n    )\n    (mu): Linear(in_features=256, out_features=4, bias=True)\n    (log_std): Linear(in_features=256, out_features=4, bias=True)\n  )\n  (critic): ContinuousCritic(\n    (features_extractor): FlattenExtractor(\n      (flatten): Flatten(start_dim=1, end_dim=-1)\n    )\n    (qf0): Sequential(\n      (0): Linear(in_features=45, out_features=256, bias=True)\n      (1): ReLU()\n      (2): Linear(in_features=256, out_features=256, bias=True)\n      (3): ReLU()\n      (4): Linear(in_features=256, out_features=1, bias=True)\n    )\n    (qf1): Sequential(\n      (0): Linear(in_features=45, out_features=256, bias=True)\n      (1): ReLU()\n      (2): Linear(in_features=256, out_features=256, bias=True)\n      (3): ReLU()\n      (4): Linear(in_features=256, out_features=1, bias=True)\n    )\n  )\n  (critic_target): ContinuousCritic(\n    (features_extractor): FlattenExtractor(\n      (flatten): Flatten(start_dim=1, end_dim=-1)\n    )\n    (qf0): Sequential(\n      (0): Linear(in_features=45, out_features=256, bias=True)\n      (1): ReLU()\n      (2): Linear(in_features=256, out_features=256, bias=True)\n      (3): ReLU()\n      (4): Linear(in_features=256, out_features=1, bias=True)\n    )\n    (qf1): Sequential(\n      (0): Linear(in_features=45, out_features=256, bias=True)\n      (1): ReLU()\n      (2): Linear(in_features=256, out_features=256, bias=True)\n      (3): ReLU()\n      (4): Linear(in_features=256, out_features=1, bias=True)\n    )\n  )\n)', 'actor': 'Actor(\n  (features_extractor): FlattenExtractor(\n    (flatten): Flatten(start_dim=1, end_dim=-1)\n  )\n  (latent_pi): Sequential(\n    (0): Linear(in_features=41, out_features=256, bias=True)\n    (1): ReLU()\n    (2): Linear(in_features=256, out_features=256, bias=True)\n    (3): ReLU()\n  )\n  (mu): Linear(in_features=256, out_features=4, bias=True)\n  (log_std): Linear(in_features=256, out_features=4, bias=True)\n)', 'critic': 'ContinuousCritic(\n  (features_extractor): FlattenExtractor(\n    (flatten): Flatten(start_dim=1, end_dim=-1)\n  )\n  (qf0): Sequential(\n    (0): Linear(in_features=45, out_features=256, bias=True)\n    (1): ReLU()\n    (2): Linear(in_features=256, out_features=256, bias=True)\n    (3): ReLU()\n    (4): Linear(in_features=256, out_features=1, bias=True)\n  )\n  (qf1): Sequential(\n    (0): Linear(in_features=45, out_features=256, bias=True)\n    (1): ReLU()\n    (2): Linear(in_features=256, out_features=256, bias=True)\n    (3): ReLU()\n    (4): Linear(in_features=256, out_features=1, bias=True)\n  )\n)', 'critic_target': 'ContinuousCritic(\n  (features_extractor): FlattenExtractor(\n    (flatten): Flatten(start_dim=1, end_dim=-1)\n  )\n  (qf0): Sequential(\n    (0): Linear(in_features=45, out_features=256, bias=True)\n    (1): ReLU()\n    (2): Linear(in_features=256, out_features=256, bias=True)\n    (3): ReLU()\n    (4): Linear(in_features=256, out_features=1, bias=True)\n  )\n  (qf1): Sequential(\n    (0): Linear(in_features=45, out_features=256, bias=True)\n    (1): ReLU()\n    (2): Linear(in_features=256, out_features=256, bias=True)\n    (3): ReLU()\n    (4): Linear(in_features=256, out_features=1, bias=True)\n  )\n)', 'batch_norm_stats': '[]', 'batch_norm_stats_target': '[]', '_logger': '<stable_baselines3.common.logger.Logger object at 0x7178b62a7e10>'}
+2026-04-01 22:40:55,220 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_1, True
+2026-04-01 22:40:55,223 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 22:52:28,461 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_1, True
+2026-04-01 22:52:28,464 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 23:03:49,200 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_1, True
+2026-04-01 23:03:49,203 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 23:15:27,415 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_2, True
+2026-04-01 23:15:27,418 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 23:26:39,358 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_2, True
+2026-04-01 23:26:39,361 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 23:37:43,742 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_2, True
+2026-04-01 23:37:43,745 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-01 23:49:34,791 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_2, True
+2026-04-01 23:49:34,794 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:00:50,349 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_3, True
+2026-04-02 00:00:50,353 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:12:07,920 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_3, True
+2026-04-02 00:12:07,923 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:23:31,646 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_3, True
+2026-04-02 00:23:31,649 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:34:56,853 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_3, True
+2026-04-02 00:34:56,856 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:45:53,778 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_4, True
+2026-04-02 00:45:53,781 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 00:57:06,879 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_4, True
+2026-04-02 00:57:06,882 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 01:07:53,769 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_4, True
+2026-04-02 01:07:53,772 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 01:18:55,065 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_4, True
+2026-04-02 01:18:55,068 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 01:29:57,615 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_5, True
+2026-04-02 01:29:57,618 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 01:40:51,237 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_5, True
+2026-04-02 01:40:51,240 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 01:51:39,083 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_5, True
+2026-04-02 01:51:39,086 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:02:37,241 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_5, True
+2026-04-02 02:02:37,244 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:13:24,268 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_6, True
+2026-04-02 02:13:24,271 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:24:06,177 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_6, True
+2026-04-02 02:24:06,180 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:34:48,683 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_6, True
+2026-04-02 02:34:48,686 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:45:40,061 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_6, True
+2026-04-02 02:45:40,064 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 02:56:29,119 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_7, True
+2026-04-02 02:56:29,122 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 03:07:17,033 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_7, True
+2026-04-02 03:07:17,037 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 03:18:04,714 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_7, True
+2026-04-02 03:18:04,717 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 03:28:58,309 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_7, True
+2026-04-02 03:28:58,312 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 03:39:51,188 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_8, True
+2026-04-02 03:39:51,191 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 03:50:36,130 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_8, True
+2026-04-02 03:50:36,133 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:01:26,978 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_8, True
+2026-04-02 04:01:26,981 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:12:17,783 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_8, True
+2026-04-02 04:12:17,786 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:23:07,760 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_9, True
+2026-04-02 04:23:07,763 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:34:05,438 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_9, True
+2026-04-02 04:34:05,441 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:44:49,354 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_9, True
+2026-04-02 04:44:49,356 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 04:55:41,910 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_9, True
+2026-04-02 04:55:41,914 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 05:06:32,492 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_10, True
+2026-04-02 05:06:32,495 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 05:17:13,755 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_10, True
+2026-04-02 05:17:13,758 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 05:27:59,232 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_10, True
+2026-04-02 05:27:59,235 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 05:38:52,708 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_10, True
+2026-04-02 05:38:52,711 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 05:49:39,338 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_11, True
+2026-04-02 05:49:39,341 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:00:27,351 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_11, True
+2026-04-02 06:00:27,354 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:11:17,466 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_11, True
+2026-04-02 06:11:17,469 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:22:25,408 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_11, True
+2026-04-02 06:22:25,411 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:33:26,992 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_12, True
+2026-04-02 06:33:26,994 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:44:18,877 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_12, True
+2026-04-02 06:44:18,880 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 06:55:04,398 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_12, True
+2026-04-02 06:55:04,401 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 07:06:09,389 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_12, True
+2026-04-02 07:06:09,392 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 07:16:59,993 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_13, True
+2026-04-02 07:16:59,996 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 07:27:46,381 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_13, True
+2026-04-02 07:27:46,383 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 07:38:26,599 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_13, True
+2026-04-02 07:38:26,602 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 07:49:22,701 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_13, True
+2026-04-02 07:49:22,704 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:00:13,947 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_14, True
+2026-04-02 08:00:13,950 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:10:57,335 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_14, True
+2026-04-02 08:10:57,338 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:21:42,970 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_14, True
+2026-04-02 08:21:42,973 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:32:44,830 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_14, True
+2026-04-02 08:32:44,833 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:43:41,576 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_15, True
+2026-04-02 08:43:41,579 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 08:54:28,838 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_15, True
+2026-04-02 08:54:28,841 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:05:08,318 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_15, True
+2026-04-02 09:05:08,320 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:16:00,396 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_15, True
+2026-04-02 09:16:00,399 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:26:55,453 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_16, True
+2026-04-02 09:26:55,456 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:37:42,068 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_16, True
+2026-04-02 09:37:42,071 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:48:27,625 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_16, True
+2026-04-02 09:48:27,628 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 09:59:23,982 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_16, True
+2026-04-02 09:59:23,986 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 10:10:19,811 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_17, True
+2026-04-02 10:10:19,815 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 10:21:04,973 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_17, True
+2026-04-02 10:21:04,977 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 10:31:45,343 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_17, True
+2026-04-02 10:31:45,346 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 10:42:44,916 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_17, True
+2026-04-02 10:42:44,919 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 10:54:21,841 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_18, True
+2026-04-02 10:54:21,844 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 11:06:46,596 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_18, True
+2026-04-02 11:06:46,599 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 11:18:59,026 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_18, True
+2026-04-02 11:18:59,029 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 11:30:18,783 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_18, True
+2026-04-02 11:30:18,789 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 11:41:41,008 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_19, True
+2026-04-02 11:41:41,010 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 11:52:44,799 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_19, True
+2026-04-02 11:52:44,802 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 12:03:45,982 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_19, True
+2026-04-02 12:03:45,986 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 12:15:03,660 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_19, True
+2026-04-02 12:15:03,663 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 12:26:20,778 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_20, True
+2026-04-02 12:26:20,780 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 12:37:14,599 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_20, True
+2026-04-02 12:37:14,602 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 12:48:42,467 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_20, True
+2026-04-02 12:48:42,470 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:00:45,367 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_20, True
+2026-04-02 13:00:45,370 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:12:32,068 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_21, True
+2026-04-02 13:12:32,071 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:23:43,484 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_21, True
+2026-04-02 13:23:43,487 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:34:44,361 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_21, True
+2026-04-02 13:34:44,364 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:46:01,681 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_21, True
+2026-04-02 13:46:01,684 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 13:57:17,526 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_22, True
+2026-04-02 13:57:17,529 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:08:18,961 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_22, True
+2026-04-02 14:08:18,964 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:19:08,866 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_2/fsp_agent2_22, True
+2026-04-02 14:19:08,869 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:30:40,234 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_3/fsp_agent3_22, True
+2026-04-02 14:30:40,238 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:42:10,214 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_0/fsp_agent0_23, True
+2026-04-02 14:42:10,217 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:53:13,410 INFO    MainThread:467280 [wandb_run.py:_tensorboard_callback():1614] tensorboard callback: results/pe/save-pursuit_evasion-04.01.2026_22.29/tb_logs/agent_1/fsp_agent1_23, True
+2026-04-02 14:53:13,412 INFO    MainThread:467280 [wandb_run.py:_config_callback():1403] config_cb None None {}
+2026-04-02 14:56:51,360 INFO    wandb-AsyncioManager-main:467280 [service_client.py:_forward_responses():134] Reached EOF.
+2026-04-02 14:56:51,360 INFO    wandb-AsyncioManager-main:467280 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.

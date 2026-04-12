@@ -1,0 +1,7 @@
+{"time":"2026-04-03T13:32:43.692788712-04:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-03T13:32:43.693535953-04:00","level":"INFO","msg":"stream: starting","core version":"0.25.1"}
+{"time":"2026-04-03T13:32:45.380875764-04:00","level":"INFO","msg":"stream: created new stream","id":"4crvfcss"}
+{"time":"2026-04-03T13:32:45.380935637-04:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-03T13:32:45.381068598-04:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-03T13:32:45.381086202-04:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-03T13:32:45.3810856-04:00","level":"INFO","msg":"writer: started","stream_id":"4crvfcss"}
