@@ -37,11 +37,11 @@ env_params:
   num_evaders: 2
 
   # Game
-  capture_distance: 0.2
+  capture_distance: 2.0
   terminate_on_first_capture: true
 
   # Arena (spherical boundary)
-  flight_dome_size: 3.0
+  flight_dome_size: 8.0
   boundary_penalty_fraction: 0.8  # grey zone starts at this fraction of dome radius
 
   # Spawning
