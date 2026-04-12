@@ -1,0 +1,112 @@
+[
+  {
+    "episode": 1,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -1115.79,
+      "uav_3": -400.0
+    },
+    "steps": 68
+  },
+  {
+    "episode": 2,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 3,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 4,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 5,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 6,
+    "outcome": "pursuers_win",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -261.43,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 107
+  },
+  {
+    "episode": 7,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -563.44
+    },
+    "steps": 50
+  },
+  {
+    "episode": 8,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 9,
+    "outcome": "draw",
+    "rewards": {
+      "uav_0": -400.0,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 1
+  },
+  {
+    "episode": 10,
+    "outcome": "pursuers_win",
+    "rewards": {
+      "uav_0": -169.88,
+      "uav_1": -400.0,
+      "uav_2": -400.0,
+      "uav_3": -400.0
+    },
+    "steps": 92
+  }
+]

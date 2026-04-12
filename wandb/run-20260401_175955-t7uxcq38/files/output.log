@@ -1,0 +1,265 @@
+
+-----------------------------------pursuit_evasiont_evasion
+| components/          |          |ma_quadx_pursuit_evasion
+|    boundary          | -0.279   |gent 0t_evasion
+|    distance_progress | -2.25    |ma_quadx_pursuit_evasion
+|    time_penalty      | -0.26    |n-0-04.01.2026_17.59/tb_logs/agent_0/fsp_agent0_1
+| rollout/             |          |
+|    ep_len_mean       | 27.2     |
+|    ep_rew_mean       | -45.3    |
+| time/                |          |
+|    episodes          | 4        |
+|    fps               | 56       |
+|    time_elapsed      | 1        |
+|    total_timesteps   | 109      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -15.7    |
+|    distance_progress | -0.0846  |
+|    time_penalty      | -0.25    |
+| rollout/             |          |
+|    ep_len_mean       | 25.5     |
+|    ep_rew_mean       | -79.5    |
+| time/                |          |
+|    episodes          | 8        |
+|    fps               | 52       |
+|    time_elapsed      | 3        |
+|    total_timesteps   | 204      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -3.66    |
+|    distance_progress | -0.507   |
+|    time_penalty      | -0.27    |
+| rollout/             |          |
+|    ep_len_mean       | 26.3     |
+|    ep_rew_mean       | -56.3    |
+| time/                |          |
+|    episodes          | 12       |
+|    fps               | 52       |
+|    time_elapsed      | 6        |
+|    total_timesteps   | 316      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -6.57    |
+|    distance_progress | 3.53     |
+|    time_penalty      | -0.24    |
+| rollout/             |          |
+|    ep_len_mean       | 26.3     |
+|    ep_rew_mean       | -87.1    |
+| time/                |          |
+|    episodes          | 16       |
+|    fps               | 51       |
+|    time_elapsed      | 8        |
+|    total_timesteps   | 421      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -9.49    |
+|    distance_progress | -1.94    |
+|    time_penalty      | -0.18    |
+| rollout/             |          |
+|    ep_len_mean       | 25.8     |
+|    ep_rew_mean       | -109     |
+| time/                |          |
+|    episodes          | 20       |
+|    fps               | 50       |
+|    time_elapsed      | 10       |
+|    total_timesteps   | 515      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -12.5    |
+|    distance_progress | -1.37    |
+|    time_penalty      | -0.2     |
+| rollout/             |          |
+|    ep_len_mean       | 25       |
+|    ep_rew_mean       | -130     |
+| time/                |          |
+|    episodes          | 24       |
+|    fps               | 49       |
+|    time_elapsed      | 12       |
+|    total_timesteps   | 600      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -9.67    |
+|    distance_progress | -0.85    |
+|    time_penalty      | -0.18    |
+| rollout/             |          |
+|    ep_len_mean       | 24.4     |
+|    ep_rew_mean       | -150     |
+| time/                |          |
+|    episodes          | 28       |
+|    fps               | 48       |
+|    time_elapsed      | 13       |
+|    total_timesteps   | 683      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -8.54    |
+|    distance_progress | -2.77    |
+|    time_penalty      | -0.23    |
+| rollout/             |          |
+|    ep_len_mean       | 24       |
+|    ep_rew_mean       | -147     |
+| time/                |          |
+|    episodes          | 32       |
+|    fps               | 48       |
+|    time_elapsed      | 15       |
+|    total_timesteps   | 768      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -0.593   |
+|    distance_progress | -5.33    |
+|    time_penalty      | -0.24    |
+| rollout/             |          |
+|    ep_len_mean       | 23.9     |
+|    ep_rew_mean       | -137     |
+| time/                |          |
+|    episodes          | 36       |
+|    fps               | 48       |
+|    time_elapsed      | 17       |
+|    total_timesteps   | 862      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -11.6    |
+|    distance_progress | -6.27    |
+|    time_penalty      | -0.23    |
+| rollout/             |          |
+Eval num_timesteps=1000, episode_reward=-239.38 +/- 149.52
+Episode length: 19.80 +/- 4.87    |
+-----------------------------------
+| components/          |          |
+|    boundary          | -8.94    |
+|    distance_progress | -5.33    |
+|    time_penalty      | -0.3     |
+| eval/                |          |
+|    mean_ep_length    | 19.8     |
+|    mean_reward       | -239     |
+| time/                |          |
+|    total_timesteps   | 1000     |
+| train/               |          |
+|    actor_loss        | -1.93    |
+|    critic_loss       | 516      |
+|    ent_coef          | 0.787    |
+|    ent_coef_loss     | -0.886   |
+|    learning_rate     | 0.0003   |
+|    n_updates         | 899      |
+-----------------------------------
+-----------------------------------
+| components/          |          |ard: [-400.]
+|    boundary          | -11.1    |
+|    distance_progress | 0.298    |
+|    time_penalty      | -0.11    |
+| rollout/             |          |gent 1t_evasion
+-----------------------------------ma_quadx_pursuit_evasion
+| components/          |          |n-0-04.01.2026_17.59/tb_logs/agent_1/fsp_agent1_1
+[34m[1mwandb[0m: [33mWARNING[0m When using several event log directories, please call `wandb.tensorboard.patch(root_logdir="...")` before `wandb.init`
+|    boundary          | -12      |
+|    distance_progress | -0.00886 |
+|    time_penalty      | -0.25    |
+| rollout/             |          |
+|    ep_len_mean       | 24.8     |
+|    ep_rew_mean       | -64.5    |
+| time/                |          |
+|    episodes          | 8        |
+|    fps               | 54       |
+|    time_elapsed      | 3        |
+|    total_timesteps   | 198      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -3.7     |
+|    distance_progress | -4.71    |
+|    time_penalty      | -0.28    |
+| rollout/             |          |
+|    ep_len_mean       | 25.4     |
+|    ep_rew_mean       | -48.1    |
+| time/                |          |
+|    episodes          | 12       |
+|    fps               | 52       |
+|    time_elapsed      | 5        |
+|    total_timesteps   | 305      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -12.8    |
+|    distance_progress | 1.56     |
+|    time_penalty      | -0.24    |
+| rollout/             |          |
+|    ep_len_mean       | 26       |
+|    ep_rew_mean       | -58.4    |
+| time/                |          |
+|    episodes          | 16       |
+|    fps               | 51       |
+|    time_elapsed      | 8        |
+|    total_timesteps   | 416      |
+-----------------------------------
+| components/          |          |
+|    boundary          | -0.298   |
+|    distance_progress | -3.59    |
+|    time_penalty      | -0.28    |
+| rollout/             |          |
+|    ep_len_mean       | 26.6     |
+|    ep_rew_mean       | -64      |
+| time/                |          |
+|    episodes          | 20       |
+|    fps               | 51       |
+|    time_elapsed      | 10       |
+|    total_timesteps   | 532      |
+-----------------------------------
+| components/          |          |
+|    distance_progress | -1.15    |
+|    time_penalty      | -0.27    |
+| rollout/             |          |
+|    ep_len_mean       | 25.5     |
+|    ep_rew_mean       | -52      |
+| time/                |          |
+|    episodes          | 24       |
+|    fps               | 49       |
+|    time_elapsed      | 12       |
+|    total_timesteps   | 611      |
+| train/               |          |
+|    actor_loss        | -5.85    |
+|    critic_loss       | 35.8     |
+|    ent_coef          | 0.863    |
+|    ent_coef_loss     | -0.88    |
+|    learning_rate     | 0.0003   |
+                                  |
+                             ------
+Traceback (most recent call last):
+  File "/home/volodymyr/work/UAV-MARL-Lib/test_ma_envs.py", line 293, in <module>
+    train(**vars(ARGS))
+  File "/home/volodymyr/work/UAV-MARL-Lib/test_ma_envs.py", line 236, in train
+    Trainer.train_agent(agent_id, wb, total_timesteps=update_interval, callbacks=callbacks[agent_id])
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/marl_wrappers/selfplay.py", line 309, in train_agent
+    model.learn(total_timesteps=total_timesteps,
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/sac/sac.py", line 313, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/common/off_policy_algorithm.py", line 335, in learn
+    rollout = self.collect_rollouts(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/common/off_policy_algorithm.py", line 568, in collect_rollouts
+    new_obs, rewards, dones, infos = env.step(actions)
+                                     ^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/common/vec_env/base_vec_env.py", line 222, in step
+    return self.step_wait()
+           ^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/common/vec_env/vec_monitor.py", line 75, in step_wait
+    obs, rewards, dones, infos = self.venv.step_wait()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/.venv/lib/python3.11/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 71, in step_wait
+    obs, self.reset_infos[env_idx] = self.envs[env_idx].reset()
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/marl_wrappers/selfplay.py", line 143, in reset
+    obs_dict, infos = self.ma_env.reset(seed=seed, options=options)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/pz_envs/quadx_envs/ma_quadx_pursuit_evasion_env.py", line 214, in reset
+    super().end_reset(seed, options)
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/pz_envs/quadx_envs/ma_quadx_base_env.py", line 251, in end_reset
+    self.aviary.step()
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/core/aviary.py", line 513, in step
+    [drone.update_physics() for drone in self.armed_drones]
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/core/aviary.py", line 513, in <listcomp>
+    [drone.update_physics() for drone in self.armed_drones]
+     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/core/drones/quadx.py", line 498, in update_physics
+    self.body.physics_update()
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/core/abstractions/boring_bodies.py", line 121, in physics_update
+    self.p.applyExternalForce(
+KeyboardInterrupt

@@ -1,0 +1,19 @@
+2026-04-03 13:37:13,939 INFO    MainThread:36411 [wandb_setup.py:_flush():81] Current SDK version is 0.25.1
+2026-04-03 13:37:13,939 INFO    MainThread:36411 [wandb_setup.py:_flush():81] Configure stats pid to 36411
+2026-04-03 13:37:13,939 INFO    MainThread:36411 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-03 13:37:13,939 INFO    MainThread:36411 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260403_133713-3k3gr1fk/logs/debug.log
+2026-04-03 13:37:13,939 INFO    MainThread:36411 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260403_133713-3k3gr1fk/logs/debug-internal.log
+2026-04-03 13:37:13,942 INFO    MainThread:36411 [wandb_init.py:init():844] calling init triggers
+2026-04-03 13:37:13,942 INFO    MainThread:36411 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'algo': 'SAC', 'env': 'pursuit_evasion', 'strategy': 'dp', 'num_agents': 4, 'total_timesteps': 2000000, 'update_interval': 25000, 'learning_rate': 0.0003, 'buffer_size': 100000, 'batch_size': 256, 'learning_starts': 5000, 'gamma': 0.99, 'tau': 0.005, 'ent_coef': 'auto', '_wandb': {}}
+2026-04-03 13:37:13,942 INFO    MainThread:36411 [wandb_init.py:init():892] starting backend
+2026-04-03 13:37:14,182 INFO    MainThread:36411 [wandb_init.py:init():895] sending inform_init request
+2026-04-03 13:37:14,186 INFO    MainThread:36411 [wandb_init.py:init():903] backend started and connected
+2026-04-03 13:37:14,189 INFO    MainThread:36411 [wandb_init.py:init():973] updated telemetry
+2026-04-03 13:37:14,196 INFO    MainThread:36411 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-04-03 13:37:16,337 INFO    MainThread:36411 [wandb_init.py:init():1042] starting run threads in backend
+2026-04-03 13:37:16,461 INFO    MainThread:36411 [wandb_run.py:_console_start():2524] atexit reg
+2026-04-03 13:37:16,461 INFO    MainThread:36411 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-04-03 13:37:16,462 INFO    MainThread:36411 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-04-03 13:37:16,462 INFO    MainThread:36411 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-04-03 13:37:16,467 INFO    MainThread:36411 [wandb_init.py:init():1082] run started, returning control to user process

@@ -42,38 +42,97 @@ pre-commit run --all-files
 ## Training
 
 ```bash
-# Main multi-agent training entry point
-python test_ma_envs.py --env dogfight_FW --total_timesteps 5000 --update_interval 1000
+# Multi-agent training (config-driven)
+python src/train.py --config configs/pursuit_evasion.yaml
 
-# Single-agent training
-python test_sa_envs.py
+# Override config values via CLI
+python src/train.py --config configs/pursuit_evasion.yaml --total_timesteps 50000 --strategy fp
 ```
 
-Key CLI args for `test_ma_envs.py`: `--env`, `--strategy`, `--num_agents`, `--total_timesteps`, `--update_interval`, `--n_envs`, `--output_folder`, `--flight_mode`.
+Training configs are YAML files in `configs/`. Key config keys: `env`, `strategy`, `total_timesteps`, `update_interval`, `n_envs`, `output_folder`, `policy`, `sac_hyperparams`, `env_params`.
+
+The core training logic lives in `src/training/train_ma_envs.py`.
 
 ## Evaluation
 
 ```bash
-python run_ma_policy.py   # Loads saved models, runs competitive eval, plots results
+# Statistical eval (headless, saves eval_results.json to save_dir)
+python src/eval.py --save_dir results/pe/save-pursuit_evasion-04.01.2026_22.29
+
+# Record video (requires env to implement capture_frame())
+python src/eval.py --save_dir ... --record --record_episodes 3
+
+# Live GUI viewing
+python src/eval.py --save_dir ... --visual
 ```
 
-Edit `save_dir` and `model_filename_template` in the script to point at your trained models.
+Key CLI args: `--save_dir` (required), `--env` (auto-detected from dir name), `--model_template`, `--num_episodes` (default 10), `--seed`, `--max_duration`, `--record`, `--visual`.
+
+Model loading: tries the template first (`final_agent_{agent_num}_model.zip`), then falls back to the latest `agent_X_br_*.zip` best-response checkpoint.
+
+## Plotting
+
+```bash
+# Plot eval reward curves
+python src/plotting/plot_rewards.py --run_dir results/pe/save-pursuit_evasion-...
+
+# Plot win-rate comparison across strategies
+python src/plotting/plot_win_rates.py --results run1/eval_results.json run2/eval_results.json --labels "VP" "FP"
+```
+
+## Project Structure
+
+```
+├── PyFlyt/                          # Library source
+│   ├── core/                        # Physics layer (Aviary, drones)
+│   ├── gym_envs/                    # Single-agent Gymnasium envs
+│   ├── pz_envs/                     # Multi-agent PettingZoo envs
+│   └── marl_wrappers/               # Self-play / fictitious play wrappers
+├── src/
+│   ├── train.py                     # Training entry point (loads YAML config)
+│   ├── eval.py                      # Evaluation entry point (stats, video, visual)
+│   ├── training/
+│   │   └── train_ma_envs.py         # Core MA training logic, ENV_REGISTRY, callbacks
+│   ├── plotting/
+│   │   ├── plot_rewards.py          # Eval reward curves
+│   │   └── plot_win_rates.py        # Win-rate bar charts from eval_results.json
+│   └── visualization/
+│       └── view_env.py              # Quick visual test with random actions
+├── configs/                         # YAML training configs
+├── tests/                           # pytest test suite
+└── results/                         # Training outputs (gitignored)
+```
 
 ## Architecture
 
 ### Two-layer environment hierarchy
 
 **Physics layer** (`PyFlyt/core/`): PyBullet-based flight simulation.
-- `Aviary` — central physics manager (240Hz physics, configurable agent Hz)
+- `Aviary` — central physics manager, inherits from `BulletClient` (240Hz physics, configurable agent Hz)
 - Drone implementations: `QuadX`, `Fixedwing`, `Rocket` in `core/drones/`
-- Vehicle parameters defined in YAML configs under `models/vehicles/`
 
 **Environment layer** — Gymnasium and PettingZoo wrappers over the physics:
-- **Single-agent** (`PyFlyt/gym_envs/`): Standard Gymnasium envs (hover, waypoints, gates, pole balance, ball-in-cup). Base class: `QuadXBaseEnv`.
+- **Single-agent** (`PyFlyt/gym_envs/`): Standard Gymnasium envs (hover, waypoints). Base class: `QuadXBaseEnv`.
 - **Multi-agent** (`PyFlyt/pz_envs/`): PettingZoo `ParallelEnv` implementations. Key envs:
-  - `MAFixedwingDogfightEnv` (V2) — team-based aerial dogfight with configurable team size, damage model, lethal distance/angle
+  - `MAFixedwingDogfightEnvV2` — team-based aerial dogfight with configurable team size, damage model, lethal distance/angle
+  - `MAQuadXPursuitEvasionEnv` — configurable NvN pursuit-evasion in a spherical arena (primary active env)
   - `CombatWaypointPursuitEnv` — ego pursues waypoints while adversary pursues ego (Dict observation space)
   - `MAQuadXHoverEnv` — multi-agent cooperative hovering
+
+Competitive envs implement `capture_frame()` (returns RGB array for video recording) and `interpret_outcome(infos)` (returns outcome string like `"pursuers_win"`, `"evaders_win"`, `"draw"`). These are used by `src/eval.py`.
+
+### PettingZoo agent lifecycle (important)
+
+**PettingZoo `ParallelEnv` removes terminated/truncated agents from `env.agents` after each `step()`.** The correct episode loop pattern is:
+
+```python
+obs, _ = env.reset()
+while env.agents:          # NOT while not all(dones.values())
+    actions = {agent: ... for agent in env.agents}
+    obs, rewards, terms, truncs, infos = env.step(actions)
+```
+
+Do **not** track a separate `dones` dict — agents disappear from `env.agents` on termination, so a `dones`-based loop will spin forever once agents are removed but `dones` still has `False` entries for them.
 
 ### Game-theoretic training system (`PyFlyt/marl_wrappers/selfplay.py`)
 
@@ -99,17 +158,17 @@ Self-play strategies (`s*`) train against the agent's *own* past policies; non-s
 
 ### Registries
 
-Environments and strategies are selected via dicts in `test_ma_envs.py`:
+Environments and strategies are selected via dicts in `src/training/train_ma_envs.py`:
 - `ENV_REGISTRY` — maps string keys to environment classes
-- `STRAT_REGISTRY` — list of valid strategy codes
+- Strategy codes validated in training logic
 
 ### Logging
 
-WandB + TensorBoard. Custom callbacks in `test_ma_envs.py`: `RewardLoggingCallback` (logs `reward_components/*` from info dict), `MyWandbCallback`.
+WandB + TensorBoard. Custom callbacks in `src/training/train_ma_envs.py`: `RewardLoggingCallback` (logs `reward_components/*` from info dict), `MyWandbCallback`.
 
 ### Key env design details
 
 - Observation space: attitude (12D Euler / 13D quaternion) + auxiliary state + health (for competitive envs)
 - Action space: 4D for QuadX (angular rates + thrust), 4-6D for Fixedwing
 - `combat` env uses `MultiInputPolicy` (Dict obs); all others use `MlpPolicy`
-- Competitive envs signal game outcome via `team_win` flag in the info dict
+- Pursuit-evasion env loads defaults from `configs/pursuit_evasion.yaml`; constructor kwargs override any config value

@@ -161,6 +161,8 @@ class MAQuadXPursuitEvasionEnv(MAQuadXBaseEnv):
         self._np_random = np.random.default_rng()
         self._dome_line_ids: list[int] = []
         self._cached_info: dict[str, Any] = {}
+        self._frame_width: int = 720
+        self._frame_height: int = 720
 
     def observation_space(self, agent: Any = None) -> spaces.Box:
         """Return flat Box observation space (same for all agents)."""
@@ -521,3 +523,47 @@ class MAQuadXPursuitEvasionEnv(MAQuadXBaseEnv):
         info.update(self._cached_info)
 
         return term, trunc, reward, info
+
+    def capture_frame(self) -> np.ndarray:
+        """Return an RGB frame from a top-down debug visualizer camera."""
+        view_matrix = self.aviary.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=[0, 0, 1.5],
+            distance=self.flight_dome_size * 2.0,
+            yaw=45,
+            pitch=-45,
+            roll=0,
+            upAxisIndex=2,
+        )
+        projection_matrix = self.aviary.computeProjectionMatrixFOV(
+            fov=60.0,
+            aspect=self._frame_width / self._frame_height,
+            nearVal=0.1,
+            farVal=100.0,
+        )
+        _, _, rgba, _, _ = self.aviary.getCameraImage(
+            width=self._frame_width,
+            height=self._frame_height,
+            viewMatrix=view_matrix,
+            projectionMatrix=projection_matrix,
+        )
+        rgb = np.reshape(rgba, (self._frame_height, self._frame_width, 4))[:, :, :3]
+        return rgb
+
+    def interpret_outcome(self, infos: dict[str, dict[str, Any]]) -> str:
+        """Interpret episode outcome from the final step's info dicts.
+
+        Returns:
+            "pursuers_win" — at least one evader was captured.
+            "evaders_win"  — time ran out with no captures.
+            "draw"         — both sides terminated for other reasons (OOB, collision).
+        """
+        any_captured = np.any(self.captured[self.evader_ids])
+        any_survived = any(
+            infos.get(ag, {}).get("survived", False) for ag in infos
+        )
+
+        if any_captured:
+            return "pursuers_win"
+        if any_survived:
+            return "evaders_win"
+        return "draw"

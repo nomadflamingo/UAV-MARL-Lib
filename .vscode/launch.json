@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train: configs/pursuit_evasion.yaml",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_ma_envs.py",
+            "args": [
+                "--config", "configs/pursuit_evasion.yaml"
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

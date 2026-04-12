@@ -1,0 +1,18 @@
+{"time":"2026-04-01T18:07:28.571669024-04:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-01T18:07:28.573399002-04:00","level":"INFO","msg":"stream: starting","core version":"0.25.1"}
+{"time":"2026-04-01T18:07:30.580020954-04:00","level":"INFO","msg":"stream: created new stream","id":"lpv2ay6y"}
+{"time":"2026-04-01T18:07:30.580143851-04:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-01T18:07:30.580334198-04:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-01T18:07:30.580359216-04:00","level":"INFO","msg":"writer: started","stream_id":"lpv2ay6y"}
+{"time":"2026-04-01T18:07:30.58039226-04:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-01T18:07:31.027155531-04:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":2}
+{"time":"2026-04-01T18:07:31.296342468-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:07:46.027189799-04:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":0,"events_lines":2,"console_offset":1,"console_lines":60,"uploaded_len":2}
+{"time":"2026-04-01T18:07:46.247269358-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:07:54.146619461-04:00","level":"INFO","msg":"stream: closing"}
+{"time":"2026-04-01T18:07:54.542323401-04:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-04-01T18:07:54.542673285-04:00","level":"INFO","msg":"filestream: sending request","total_files":2,"console_offset":53,"console_lines":115,"uploaded_len":3,"complete":true,"exit_code":255}
+{"time":"2026-04-01T18:07:55.053843775-04:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-01T18:07:55.054013763-04:00","level":"INFO","msg":"handler: closed"}
+{"time":"2026-04-01T18:07:55.05413645-04:00","level":"INFO","msg":"sender: closed"}
+{"time":"2026-04-01T18:07:55.054146138-04:00","level":"INFO","msg":"stream: closed"}

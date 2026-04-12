@@ -1,0 +1,14 @@
+
+                             quadx_pursuit_evasiont_evasion
+[SDP Iter 1/5] ▶ Training Agent 0: ma_quadx_pursuit_evasion
+[INFO] Initializing new model for agent 0t_evasion
+                             nt_0: ma_quadx_pursuit_evasion
+Traceback (most recent call last):
+  File "/home/volodymyr/work/UAV-MARL-Lib/test_ma_envs.py", line 293, in <module>
+    train(**vars(ARGS))
+  File "/home/volodymyr/work/UAV-MARL-Lib/test_ma_envs.py", line 236, in train
+    Trainer.train_agent(agent_id, wb, total_timesteps=update_interval, callbacks=callbacks[agent_id])
+  File "/home/volodymyr/work/UAV-MARL-Lib/PyFlyt/marl_wrappers/selfplay.py", line 304, in train_agent
+    model = SAC(env=train_env,
+            ^^^^^^^^^^^^^^^^^^
+TypeError: stable_baselines3.sac.sac.SAC() got multiple values for keyword argument 'tensorboard_log'

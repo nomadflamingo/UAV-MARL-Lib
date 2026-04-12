@@ -1,0 +1,43 @@
+{
+  "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.11.15",
+  "startedAt": "2026-04-01T22:07:28.328576Z",
+  "args": [
+    "--env",
+    "pursuit_evasion"
+  ],
+  "program": "/home/volodymyr/work/UAV-MARL-Lib/test_ma_envs.py",
+  "codePath": "test_ma_envs.py",
+  "codePathLocal": "test_ma_envs.py",
+  "git": {
+    "commit": "619f838a9b9e6bbd5d65284d8630d89ec8c3ae90"
+  },
+  "email": "vbeimuk@uwaterloo.ca",
+  "root": "/home/volodymyr/work/UAV-MARL-Lib",
+  "host": "vldmr3",
+  "executable": "/home/volodymyr/work/UAV-MARL-Lib/.venv/bin/python",
+  "cpu_count": 6,
+  "cpu_count_logical": 12,
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "982838722560",
+      "used": "71553794048"
+    }
+  },
+  "memory": {
+    "total": "63040970752"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+      "memoryTotal": "6442450944",
+      "cudaCores": 3840,
+      "architecture": "Ampere",
+      "uuid": "GPU-414732cf-99de-5024-b560-b7730651fc23"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "8n7110thwzgzsalaooa18bhyeo1bkpuy"
+}

@@ -1,0 +1,89 @@
+Metadata-Version: 2.4
+Name: PyFlyt
+Version: 0.30.0
+Summary: UAV Flight Simulator Gymnasium Environments for Reinforcement Learning Research.
+Author-email: Jet <taijunjet@hotmail.com>
+License: MIT License
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Repository, https://github.com/jjshoots/PyFlyt
+Project-URL: Documentation, https://jjshoots.github.io/PyFlyt/documentation.html
+Project-URL: Bug Report, https://github.com/jjshoots/PyFlyt/issues
+Keywords: Reinforcement Learning,UAVs,drones,Quadcopter,AI,RL,Gymnasium
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: numba
+Requires-Dist: numpy<2.0.0
+Requires-Dist: scipy
+Requires-Dist: gymnasium
+Requires-Dist: pettingzoo
+Requires-Dist: pybullet
+Requires-Dist: pyyaml
+Requires-Dist: wandb
+Requires-Dist: stable_baselines3
+Requires-Dist: tensorboard
+Requires-Dist: pytest>=8.3.5
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: codecov; extra == "dev"
+Requires-Dist: pre-commit; extra == "dev"
+Requires-Dist: matplotlib; extra == "dev"
+Requires-Dist: wandb; extra == "dev"
+Dynamic: license-file
+
+# Unmanned Aerial Vehicle Multi-Agent Reinforcement Learning Library
+This Library builds of the PyFlyt UAV flight simulator with more additional multi-agent environments and example Reinforcement Learning strategies to compare new strategies to.
+
+<p align="center">
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/pyflyt_cover_photo.png?raw=true" width="600"/>
+</p>
+
+## Installation 
+This repository does have a docker image however there are some issues when using the Gymnasium GUI.
+
+## PyFlyt
+The original PyFlyt repository is also still under development and all its documentation can be found here.
+#### [View the documentation here!](https://jjshoots.github.io/PyFlyt/documentation.html)
+
+```
+@article{tai2023pyflyt,
+  title={PyFlyt--UAV Simulation Environments for Reinforcement Learning Research},
+  author={Tai, Jun Jet and Wong, Jim and Innocente, Mauro and Horri, Nadjim and Brusey, James and Phang, Swee King},
+  journal={arXiv preprint arXiv:2304.01305},
+  year={2023}
+}
+```
+
+## Gallery
+
+<p align="center">
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/fixedwing_waypoint.gif?raw=true" height="250px"/>
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/fixedwing_dogfight.gif?raw=true" height="250px"/>
+</p>
+<p align="center">
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/quadx_pole_waypoint.gif?raw=true" height="200px"/>
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/quadx_waypoint.gif?raw=true" height="200px"/>
+    <img src="https://github.com/jjshoots/PyFlyt/blob/master/readme_assets/quadx_ball_in_cup.gif?raw=true" height="200px"/>
+</p>

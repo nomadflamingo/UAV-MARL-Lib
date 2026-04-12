@@ -1,0 +1,13 @@
+2026-04-03 13:32:43,441 INFO    MainThread:35108 [wandb_setup.py:_flush():81] Current SDK version is 0.25.1
+2026-04-03 13:32:43,441 INFO    MainThread:35108 [wandb_setup.py:_flush():81] Configure stats pid to 35108
+2026-04-03 13:32:43,442 INFO    MainThread:35108 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-03 13:32:43,442 INFO    MainThread:35108 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260403_133243-4crvfcss/logs/debug.log
+2026-04-03 13:32:43,442 INFO    MainThread:35108 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/volodymyr/work/UAV-MARL-Lib/wandb/run-20260403_133243-4crvfcss/logs/debug-internal.log
+2026-04-03 13:32:43,444 INFO    MainThread:35108 [wandb_init.py:init():844] calling init triggers
+2026-04-03 13:32:43,444 INFO    MainThread:35108 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'algo': 'SAC', 'env': 'pursuit_evasion', 'strategy': 'dp', 'num_agents': 4, 'total_timesteps': 2000000, 'update_interval': 25000, 'learning_rate': 0.0003, 'buffer_size': 100000, 'batch_size': 256, 'learning_starts': 5000, 'gamma': 0.99, 'tau': 0.005, 'ent_coef': 'auto', '_wandb': {}}
+2026-04-03 13:32:43,444 INFO    MainThread:35108 [wandb_init.py:init():892] starting backend
+2026-04-03 13:32:43,686 INFO    MainThread:35108 [wandb_init.py:init():895] sending inform_init request
+2026-04-03 13:32:43,690 INFO    MainThread:35108 [wandb_init.py:init():903] backend started and connected
+2026-04-03 13:32:43,693 INFO    MainThread:35108 [wandb_init.py:init():973] updated telemetry
+2026-04-03 13:32:43,699 INFO    MainThread:35108 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
