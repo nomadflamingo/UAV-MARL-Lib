@@ -10,7 +10,11 @@ A multi-agent reinforcement learning library for UAV (drone) environments, built
 
 [PyFlyt](https://github.com/jjshoots/PyFlyt) is a UAV flight simulator — it provides drone physics (via PyBullet) and environment interfaces for reinforcement learning, but no training code. You get `reset()` and `step()`, and bring your own algorithms.
 
-This repo builds on top of PyFlyt (it contains a modified fork in `PyFlyt/`) and adds everything needed to actually train competitive multi-agent policies: new environments (pursuit-evasion, quadcopter dogfight, capture-the-flag), game-theoretic training strategies (fictitious play, self-play, delta-uniform play), config-driven SAC training via Stable-Baselines3, and evaluation/logging tooling (WandB, TensorBoard, video recording).
+This repo builds on top of PyFlyt (it contains a modified fork in `PyFlyt/`) and adds everything needed to actually train competitive multi-agent policies: 
+- new environments (pursuit-evasion, quadcopter dogfight, capture-the-flag)
+- game-theoretic training strategies (fictitious play, self-play, delta-uniform play)
+- config-driven SAC training via Stable-Baselines3
+- evaluation/logging tooling (WandB, TensorBoard, video recording).
 
 The key addition is the iterative best-response training loop in `PyFlyt/marl_wrappers/selfplay.py`: rather than training all agents simultaneously, each agent takes turns training against a weighted mixture of its opponent's (or its own) past policies. This pushes agents toward robust strategies instead of overfitting to a single opponent.
 
