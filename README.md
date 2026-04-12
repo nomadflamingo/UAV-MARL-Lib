@@ -213,6 +213,157 @@ UAV-MARL-Lib/
 └── results/                         # Training outputs (not checked in)
 ```
 
+## Creating Custom Multi-Agent Environments
+
+All multi-agent environments are PettingZoo `ParallelEnv` subclasses that share a common base. To create a new one, subclass `MAQuadXBaseEnv` and implement four methods. The pursuit-evasion env (`PyFlyt/pz_envs/quadx_envs/ma_quadx_pursuit_evasion_env.py`) is a good reference.
+
+### 1. Subclass `MAQuadXBaseEnv`
+
+The base class (`PyFlyt/pz_envs/quadx_envs/ma_quadx_base_env.py`) handles the Aviary physics, agent naming (`uav_0`, `uav_1`, ...), action spaces, and the `step()` loop. You provide the game logic:
+
+```python
+from PyFlyt.pz_envs.quadx_envs.ma_quadx_base_env import MAQuadXBaseEnv
+
+class MyCustomEnv(MAQuadXBaseEnv):
+    metadata = {
+        "render_modes": ["human"],
+        "name": "my_custom_env",
+        "is_parallelizable": True,
+    }
+
+    def __init__(self, render_mode=None, **kwargs):
+        num_agents = 4
+        start_pos = np.zeros((num_agents, 3))  # overwritten in reset
+        start_orn = np.zeros((num_agents, 3))
+
+        super().__init__(
+            start_pos=start_pos,
+            start_orn=start_orn,
+            flight_mode=0,               # 0 = angular rate + thrust
+            flight_dome_size=3.0,
+            max_duration_seconds=30.0,
+            angle_representation="euler",
+            agent_hz=40,
+            render_mode=render_mode,
+        )
+
+        # Define your observation space (must be a gymnasium.spaces.Box)
+        self._observation_space = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(self.obs_size,), dtype=np.float64
+        )
+```
+
+### 2. Implement required methods
+
+Four methods must be implemented:
+
+**`observation_space(agent)`** — return the observation space (same for all agents in most cases):
+
+```python
+def observation_space(self, agent=None):
+    return self._observation_space
+```
+
+**`reset(seed, options)`** — generate spawn positions, call `begin_reset` / `end_reset`, return initial observations:
+
+```python
+def reset(self, seed=None, options=None):
+    self.start_pos, self.start_orn = self._generate_spawn_positions(seed)
+    super().begin_reset(seed, options or {})
+    super().end_reset(seed, options or {})
+    # Reset any game state (e.g. capture flags, score counters)
+    observations = {ag: self.compute_observation_by_id(self.agent_name_mapping[ag])
+                    for ag in self.agents}
+    infos = {ag: {} for ag in self.agents}
+    return observations, infos
+```
+
+**`compute_observation_by_id(agent_id)`** — build a flat numpy array for one agent. Use `self.compute_attitude_by_id(agent_id)` to get `(ang_vel, ang_pos, lin_vel, lin_pos, quaternion)` and `self.aviary.aux_state(agent_id)` for auxiliary state. Add any game-specific features (relative positions to opponents, boundary distance, etc.):
+
+```python
+def compute_observation_by_id(self, agent_id):
+    ang_vel, ang_pos, lin_vel, lin_pos, _ = self.compute_attitude_by_id(agent_id)
+    aux_state = self.aviary.aux_state(agent_id)
+    self_obs = np.concatenate([ang_vel, ang_pos, lin_vel, lin_pos, aux_state,
+                               self.past_actions[agent_id]])
+    # ... append relative teammate/opponent positions, game state, etc.
+    return np.concatenate([self_obs, ...])
+```
+
+**`compute_term_trunc_reward_info_by_id(agent_id)`** — return `(terminated, truncated, reward, info)` for one agent. The base `step()` calls this every physics substep and accumulates rewards. Put reward components in `info["reward_components"]` for logging:
+
+```python
+def compute_term_trunc_reward_info_by_id(self, agent_id):
+    term = False
+    trunc = self.step_count > self.max_steps
+    reward = 0.0
+    info = {}
+    rwd = {}
+
+    # Check game-ending conditions (capture, collision, out-of-bounds)
+    # Assign dense and sparse rewards
+    # ...
+
+    reward = sum(rwd.values())
+    info["reward_components"] = rwd
+    return term, trunc, reward, info
+```
+
+### 3. Optional: shared per-step computation
+
+Override `update_states()` to compute shared state once per physics substep (called before per-agent reward/obs computation). This avoids redundant work:
+
+```python
+def update_states(self):
+    self._update_pairwise_distances()
+    self._check_captures()
+```
+
+### 4. Optional: evaluation support
+
+To enable `src/eval.py` video recording and outcome statistics, implement two additional methods:
+
+- **`capture_frame()`** — return an RGB numpy array from a debug camera (see pursuit-evasion env for a PyBullet camera setup example)
+- **`interpret_outcome(infos)`** — return an outcome string (e.g. `"pursuers_win"`, `"evaders_win"`, `"draw"`) from the final step's info dicts
+
+### 5. Register and configure
+
+**Add to `PyFlyt/pz_envs/__init__.py`:**
+
+```python
+from .quadx_envs.my_custom_env import MyCustomEnv
+```
+
+**Add to `ENV_REGISTRY` in `src/training/train_ma_envs.py`:**
+
+```python
+ENV_REGISTRY = {
+    ...
+    "my_custom_env": MyCustomEnv,
+}
+```
+
+**Create a YAML config** in `configs/my_custom_env.yaml`:
+
+```yaml
+env: my_custom_env
+policy: MlpPolicy
+strategy: dp
+total_timesteps: 2000000
+update_interval: 25000
+n_envs: 8
+output_folder: results/my_custom
+
+env_params:
+  # any kwargs passed to MyCustomEnv.__init__
+```
+
+Then train with:
+
+```bash
+python src/train.py --config configs/my_custom_env.yaml
+```
+
 ## PyFlyt
 
 This project builds on the PyFlyt UAV simulator. Full PyFlyt documentation: [jjshoots.github.io/PyFlyt](https://jjshoots.github.io/PyFlyt/documentation.html)
