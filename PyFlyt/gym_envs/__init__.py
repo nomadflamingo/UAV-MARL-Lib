@@ -14,6 +14,10 @@ register(
     entry_point="PyFlyt.gym_envs.quadx_envs.quadx_waypoints_env:QuadXWaypointsEnv",
 )
 register(
+    id="PyFlyt/QuadX-DomeWaypoints-v1",
+    entry_point="PyFlyt.gym_envs.quadx_envs.quadx_dome_waypoints_env:QuadXDomeWaypointsEnv",
+)
+register(
     id="PyFlyt/QuadX-Gates-v3",
     entry_point="PyFlyt.gym_envs.quadx_envs.quadx_gates_env:QuadXGatesEnv",
 )

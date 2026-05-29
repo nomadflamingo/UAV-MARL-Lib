@@ -13,6 +13,8 @@ import numpy as np
 import yaml
 from gymnasium import spaces
 
+from PyFlyt.gym_envs.utils.dome_renderer import capture_frame as _capture_frame
+from PyFlyt.gym_envs.utils.dome_renderer import draw_dome
 from PyFlyt.pz_envs.quadx_envs.ma_quadx_base_env import MAQuadXBaseEnv
 
 
@@ -261,46 +263,9 @@ class MAQuadXPursuitEvasionEnv(MAQuadXBaseEnv):
 
     def _draw_dome(self):
         """Draw a wireframe sphere representing the arena boundary."""
-        p = self.aviary
-
-        # Remove previous dome lines
-        for line_id in self._dome_line_ids:
-            p.removeUserDebugItem(line_id)
-        self._dome_line_ids = []
-
-        r = self.flight_dome_size
-        color = [0.5, 0.5, 0.5]
-        num_segments = 48
-
-        # Great circles (XY, XZ, YZ planes) + latitude circles
-        circles: list[list[list[float]]] = []
-        for plane in range(3):
-            pts = []
-            for i in range(num_segments + 1):
-                a = 2.0 * np.pi * i / num_segments
-                if plane == 0:
-                    pts.append([r * np.cos(a), r * np.sin(a), 0.0])
-                elif plane == 1:
-                    pts.append([r * np.cos(a), 0.0, r * np.sin(a)])
-                else:
-                    pts.append([0.0, r * np.cos(a), r * np.sin(a)])
-            circles.append(pts)
-
-        for z_frac in [-0.5, 0.5]:
-            z = r * z_frac
-            rc = np.sqrt(r**2 - z**2)
-            pts = []
-            for i in range(num_segments + 1):
-                a = 2.0 * np.pi * i / num_segments
-                pts.append([rc * np.cos(a), rc * np.sin(a), z])
-            circles.append(pts)
-
-        for pts in circles:
-            for i in range(len(pts) - 1):
-                lid = p.addUserDebugLine(
-                    pts[i], pts[i + 1], lineColorRGB=color, lineWidth=1.0
-                )
-                self._dome_line_ids.append(lid)
+        self._dome_line_ids = draw_dome(
+            self.aviary, self.flight_dome_size, self._dome_line_ids
+        )
 
     def _update_pairwise_distances(self):
         """Compute NxN pairwise distance matrix from current positions."""
@@ -526,28 +491,12 @@ class MAQuadXPursuitEvasionEnv(MAQuadXBaseEnv):
 
     def capture_frame(self) -> np.ndarray:
         """Return an RGB frame from a top-down debug visualizer camera."""
-        view_matrix = self.aviary.computeViewMatrixFromYawPitchRoll(
-            cameraTargetPosition=[0, 0, 1.5],
-            distance=self.flight_dome_size * 2.0,
-            yaw=45,
-            pitch=-45,
-            roll=0,
-            upAxisIndex=2,
-        )
-        projection_matrix = self.aviary.computeProjectionMatrixFOV(
-            fov=60.0,
-            aspect=self._frame_width / self._frame_height,
-            nearVal=0.1,
-            farVal=100.0,
-        )
-        _, _, rgba, _, _ = self.aviary.getCameraImage(
+        return _capture_frame(
+            self.aviary,
+            self.flight_dome_size,
             width=self._frame_width,
             height=self._frame_height,
-            viewMatrix=view_matrix,
-            projectionMatrix=projection_matrix,
         )
-        rgb = np.reshape(rgba, (self._frame_height, self._frame_width, 4))[:, :, :3]
-        return rgb
 
     def interpret_outcome(self, infos: dict[str, dict[str, Any]]) -> str:
         """Interpret episode outcome from the final step's info dicts.

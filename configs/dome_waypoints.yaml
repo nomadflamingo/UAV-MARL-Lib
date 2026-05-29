@@ -1,0 +1,35 @@
+# ── Dome Waypoints Config ─────────────────────────────────────────────────────
+# Single-agent SAC training for the dome waypoints environment.
+# Top-level keys are training params; env_params are passed as **kwargs to the
+# environment constructor.
+
+# ── Training ──────────────────────────────────────────────────────────────────
+total_timesteps: 2000000
+n_envs: 8
+output_folder: results/dome_waypoints
+video_freq: 50000  # record a video every N environment steps (divided by n_envs internally)
+
+# SAC hyperparameters
+sac_hyperparams:
+  learning_rate: 0.0003
+  buffer_size: 200000
+  batch_size: 256
+  learning_starts: 5000
+  gamma: 0.99
+  tau: 0.005
+  ent_coef: auto
+
+# ── Environment Parameters ────────────────────────────────────────────────────
+# Passed as **kwargs directly to QuadXDomeWaypointsEnv constructor.
+env_params:
+  waypoint_reach_distance: 2.0
+  waypoint_reward: 100.0
+  flight_dome_size: 4.0
+  time_penalty: 0.1
+  distance_reward_scale: 1.0
+  spawn_min_height: 0.5
+  spawn_max_radius_fraction: 0.9
+  flight_mode: 0
+  max_duration_seconds: 30.0
+  angle_representation: euler
+  agent_hz: 30
